@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Loader2, Wand2 } from 'lucide-react';
+import { ArrowRight, Loader2, Wand2, Users } from 'lucide-react';
 import EditableParsedRequirements from '@/components/job/EditableParsedRequirements';
 import SearchQueries from '@/components/job/SearchQueries';
 import AddCandidates from '@/components/job/AddCandidates';
+import MatchScoreCard from '@/components/candidate/MatchScoreCard';
 
 const statusConfig = {
   draft: { label: 'טיוטה', className: 'bg-secondary text-secondary-foreground' },
@@ -25,6 +26,16 @@ export default function JobDetails() {
     queryFn: () => base44.entities.Job.get(id),
     refetchInterval: (data) => data?.status === 'parsing' ? 3000 : false,
   });
+
+  const { data: candidates = [] } = useQuery({
+    queryKey: ['candidates', id],
+    queryFn: () => base44.entities.Candidate.filter({ job_id: id }),
+    enabled: !!id,
+  });
+
+  const sortedCandidates = [...candidates].sort(
+    (a, b) => (b.match_result?.overall_score || 0) - (a.match_result?.overall_score || 0)
+  );
 
   const handleReparse = async () => {
     await base44.functions.invoke('parseJobDescription', { jobId: id });
@@ -82,6 +93,26 @@ export default function JobDetails() {
         <div className="lg:col-span-2 space-y-6">
           <EditableParsedRequirements job={job} jobId={id} />
           {job.generated_queries && <SearchQueries queries={job.generated_queries} jobId={id} />}
+
+          {/* Candidates */}
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                מועמדים
+              </h3>
+              <Badge variant="outline">{sortedCandidates.length}</Badge>
+            </div>
+            <div className="p-5 space-y-3">
+              {sortedCandidates.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">אין מועמדים עדיין. הוסף מועמדים מהעמודה הימנית.</p>
+              ) : (
+                sortedCandidates.map((candidate, i) => (
+                  <MatchScoreCard key={candidate.id} candidate={candidate} index={i} />
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right column */}
