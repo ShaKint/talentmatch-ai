@@ -60,6 +60,15 @@ The weights should reflect the job's priorities. A Team Lead role with 50% hands
     }
   });
 
+  // Extract location constraints from must_have
+  const locationKeywords = ['israel', 'tel aviv', 'jerusalem', 'haifa', 'remote', 'hybrid', 'on-site', 'onsite', 'usa', 'uk', 'europe', 'new york', 'london', 'berlin', 'amsterdam'];
+  const locationRequirements = (parsed.must_have || []).filter(item =>
+    locationKeywords.some(loc => item.toLowerCase().includes(loc))
+  );
+  const locationStr = locationRequirements.length > 0
+    ? `LOCATION REQUIREMENT (MUST include in ALL queries): ${locationRequirements.join(', ')}`
+    : 'Location: Israel (default — add "Israel" to all Google X-Ray queries)';
+
   // Step 2: Generate search queries
   const queries = await base44.asServiceRole.integrations.Core.InvokeLLM({
     prompt: `You are a world-class technical sourcer specializing in the Israeli tech market. Generate PRACTICAL Boolean and X-Ray search queries that return highly relevant candidates on LinkedIn and Google.
@@ -70,8 +79,8 @@ CRITICAL RULES — follow strictly:
 - Use ONLY 2-4 key terms per query. More terms = fewer results.
 - Use EXACT technology names as they appear on LinkedIn profiles (e.g. "Kotlin Multiplatform" not "cross-platform mobile").
 - Each query must use a DIFFERENT STRATEGY to reach different candidate pools.
-- For Israel-based roles: always add "Israel" to Google X-Ray queries.
 - NEVER use generic terms like "software engineer", "developer", "programming" — they return noise.
+- ${locationStr}
 
 JOB DATA:
 Title: ${parsed.title}
