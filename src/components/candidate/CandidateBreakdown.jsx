@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import {
   CheckCircle2, AlertCircle, CircleDot, MessageSquare, Save,
-  Brain, Cpu, ChevronDown, ChevronUp
+  Brain, Cpu, ChevronDown, ChevronUp, Linkedin
 } from 'lucide-react';
 
 function ScoreBadge({ score }) {
@@ -99,7 +99,16 @@ export default function CandidateBreakdown({ candidate, jobId }) {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold">{profile.name || 'מועמד'}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">{profile.name || 'מועמד'}</h3>
+              {candidate.profile_url && (
+                <a href={candidate.profile_url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">
+                  <Linkedin className="w-3.5 h-3.5" />
+                  LinkedIn
+                </a>
+              )}
+            </div>
             <p className="text-sm text-slate-600">{profile.headline || ''}</p>
           </div>
           <ScoreBadge score={match.overall_score || 0} />
