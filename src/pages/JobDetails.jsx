@@ -184,12 +184,12 @@ export default function JobDetails() {
   const parsed  = job.parsed_data || {};
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 -m-8 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen text-slate-900 -m-8 p-4 md:p-6 lg:p-8" style={{backgroundColor:'#F0F4F8'}}>
 
       {/* ── hero header ── */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 p-6 md:p-8 text-white">
+          <div className="p-6 md:p-8 text-white" style={{background: 'linear-gradient(135deg, #1A2332 0%, #1E3A4A 70%, #0E7490 100%)'}}>
             <button
               onClick={() => navigate('/jobs')}
               className="flex items-center gap-1 text-slate-400 hover:text-white text-sm mb-4 transition-colors"

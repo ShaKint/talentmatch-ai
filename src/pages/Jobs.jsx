@@ -9,10 +9,10 @@ import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
 const statusConfig = {
-  draft: { label: 'טיוטה', className: 'bg-muted text-muted-foreground' },
-  parsing: { label: 'מעבד...', className: 'bg-chart-4/10 text-chart-4 border-chart-4/20' },
-  active: { label: 'פעיל', className: 'bg-accent/10 text-accent border-accent/20' },
-  closed: { label: 'סגור', className: 'bg-destructive/10 text-destructive border-destructive/20' },
+  draft: { label: 'טיוטה', className: 'border-gray-200 text-gray-500 bg-gray-50' },
+  parsing: { label: 'מעבד...', className: 'border-amber-200 text-amber-600 bg-amber-50' },
+  active: { label: 'פעיל', className: 'border-teal-200 text-teal-700 bg-teal-50' },
+  closed: { label: 'סגור', className: 'border-red-200 text-red-600 bg-red-50' },
 };
 
 export default function Jobs() {
@@ -25,11 +25,11 @@ export default function Jobs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">משרות</h1>
-          <p className="text-muted-foreground mt-1">ניהול משרות ושאילתות חיפוש</p>
+          <h1 className="text-3xl font-bold tracking-tight" style={{color:'#1A2332'}}>משרות</h1>
+          <p className="mt-1 text-sm" style={{color:'#64748B'}}>ניהול משרות ושאילתות חיפוש</p>
         </div>
         <Link to="/jobs/new">
-          <Button className="gap-2">
+          <Button className="gap-2 text-white font-semibold rounded-xl px-5" style={{backgroundColor:'#14B8A6', border:'none'}}>
             <Plus className="w-4 h-4" />
             משרה חדשה
           </Button>
@@ -37,29 +37,29 @@ export default function Jobs() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-card rounded-xl border border-border p-6 animate-pulse">
-              <div className="h-5 bg-secondary rounded w-2/3 mb-3" />
-              <div className="h-4 bg-secondary rounded w-1/2 mb-2" />
-              <div className="h-4 bg-secondary rounded w-1/3" />
+        <div className="grid grid-cols-1 gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse shadow-sm">
+              <div className="h-5 bg-gray-100 rounded w-2/3 mb-3" />
+              <div className="h-4 bg-gray-100 rounded w-1/2 mb-2" />
+              <div className="h-4 bg-gray-100 rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <div className="bg-card rounded-xl border border-border p-16 text-center">
-          <Briefcase className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">אין משרות עדיין</h3>
-          <p className="text-muted-foreground mb-6">צור את המשרה הראשונה שלך כדי להתחיל לחפש מועמדים</p>
+        <div className="bg-white rounded-2xl border border-gray-200 p-16 text-center shadow-sm">
+          <Briefcase className="w-16 h-16 mx-auto mb-4" style={{color:'#94A3B8'}} />
+          <h3 className="text-xl font-semibold mb-2" style={{color:'#1A2332'}}>אין משרות עדיין</h3>
+          <p className="mb-6 text-sm" style={{color:'#64748B'}}>צור את המשרה הראשונה שלך כדי להתחיל לחפש מועמדים</p>
           <Link to="/jobs/new">
-            <Button className="gap-2">
+            <Button className="gap-2 text-white rounded-xl" style={{backgroundColor:'#14B8A6', border:'none'}}>
               <Plus className="w-4 h-4" />
               צור משרה
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {jobs.map((job, idx) => {
             const status = statusConfig[job.status] || statusConfig.draft;
             return (
@@ -70,47 +70,36 @@ export default function Jobs() {
                 transition={{ delay: idx * 0.05 }}
               >
                 <Link to={`/jobs/${job.id}`}>
-                  <div className="bg-card rounded-xl border border-border p-6 hover:border-primary/30 transition-all duration-300 group cursor-pointer">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          <Briefcase className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{job.title}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(job.created_date), 'dd/MM/yyyy')}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className={status.className}>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md hover:border-teal-200 transition-all duration-200 group cursor-pointer shadow-sm">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge variant="outline" className={`text-xs font-medium rounded-full px-3 py-1 ${status.className}`}>
                         {status.label}
                       </Badge>
+                      <p className="text-xs" style={{color:'#94A3B8'}}>{format(new Date(job.created_date), 'dd/MM/yyyy')}</p>
                     </div>
 
-                    {job.parsed_data && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {job.parsed_data.must_have?.slice(0, 4).map((skill, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-md">
+                    <h3 className="font-bold text-xl mb-3 text-right" style={{color:'#1A2332'}}>{job.title}</h3>
+
+                    {job.parsed_data?.must_have?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4 justify-end">
+                        {job.parsed_data.must_have.slice(0, 4).map((skill, i) => (
+                          <span key={i} className="px-2.5 py-0.5 text-xs rounded-full border" style={{backgroundColor:'#F1F5F9', color:'#475569', borderColor:'#E2E8F0'}}>
                             {skill}
                           </span>
                         ))}
-                        {(job.parsed_data.must_have?.length || 0) > 4 && (
-                          <span className="px-2 py-0.5 bg-secondary text-muted-foreground text-xs rounded-md">
+                        {job.parsed_data.must_have.length > 4 && (
+                          <span className="px-2.5 py-0.5 text-xs rounded-full border" style={{backgroundColor:'#F1F5F9', color:'#94A3B8', borderColor:'#E2E8F0'}}>
                             +{job.parsed_data.must_have.length - 4}
                           </span>
                         )}
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{job.candidate_count || 0} מועמדים</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs">צפה</span>
-                        <ArrowLeft className="w-3 h-3" />
+                    <div className="rounded-xl p-4 flex items-center justify-end gap-2" style={{backgroundColor:'#F8FAFC'}}>
+                      <span className="text-2xl font-bold" style={{color:'#1A2332'}}>{job.candidate_count || 0}</span>
+                      <div className="flex items-center gap-1" style={{color:'#94A3B8'}}>
+                        <Users className="w-5 h-5" />
+                        <span className="text-sm">מועמדים</span>
                       </div>
                     </div>
                   </div>
