@@ -63,31 +63,38 @@ For must_have and nice_to_have, also include technology synonyms. E.g. if "Backe
 
   // Step 2: Generate search queries
   const queries = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `You are an expert sourcer/recruiter who specializes in Boolean search and X-Ray search on Google.
+    prompt: `You are a world-class technical sourcer. Generate PRACTICAL, SHORT Boolean and X-Ray search queries that actually return results on LinkedIn and Google.
 
-Based on this parsed job data, generate search queries:
+CRITICAL RULES — follow strictly:
+- LinkedIn Boolean queries MUST be under 200 characters. LinkedIn's search bar truncates long queries and returns 0 results.
+- Google X-Ray queries MUST be under 150 characters. Google ignores long X-Ray queries.
+- Use ONLY 2-3 key terms per query. More terms = fewer results = useless query.
+- Prefer short title keywords over long exact phrases. "Android Lead" beats "Senior Android Team Leader".
+- Never use full sentences. Never use long must_have arrays.
+- Each query must use a DIFFERENT STRATEGY so they return different candidate pools.
 
-JOB DATA:
-${JSON.stringify(parsed, null, 2)}
+JOB DATA (extract only the 3-4 most important signals):
+Title: ${parsed.title}
+Key skills: ${(parsed.must_have || []).slice(0, 5).join(', ')}
+Alternative titles: ${(parsed.alternative_titles || []).slice(0, 4).join(', ')}
+Seniority: ${parsed.seniority}
+Domain: ${parsed.domain || ''}
 
-Generate:
-1. linkedin_boolean - Array of 4 LinkedIn Boolean search queries, each with a "label" (e.g. "Exact Match", "Broad Match", "Primary Stack Focus", "Leadership Focus") and "query" (the actual Boolean string for LinkedIn search bar)
-2. google_xray - Array of 4 Google X-Ray search queries, each with a "label" and "query" (using site:linkedin.com/in format)
+Generate 4 linkedin_boolean queries using these strategies:
+1. "Title Focus" — 2-3 title variations only, no skills. E.g: ("Android Team Lead" OR "Mobile Tech Lead" OR "Android Lead")
+2. "Stack + Title" — 1 title keyword AND 2 core skills. E.g: ("Team Lead" OR "Tech Lead") AND (Android OR Kotlin) AND Spring
+3. "Broad Reach" — skills only, no title constraint, catch people with different titles. E.g: (Android OR Kotlin OR iOS) AND (Spring OR Backend) AND Lead
+4. "Seniority Signal" — use seniority words + top 2 skills. E.g: (Senior OR Lead OR Principal) AND Android AND Kotlin
 
-Rules for LinkedIn Boolean:
-- Use AND, OR, NOT operators
-- Use quotes for exact phrases
-- Use parentheses for grouping
-- Include title variations
+Generate 4 google_xray queries using these strategies:
+1. "Exact Role" — site:linkedin.com/in + 1 quoted title + 1-2 skills + country
+2. "Stack Search" — site:linkedin.com/in + 2-3 skills + Lead/Senior + country
+3. "Broad Title" — site:linkedin.com/in + multiple title variations (OR) + country
+4. "Skill Combo" — site:linkedin.com/in + unique skill combination that signals this profile type
 
-Rules for Google X-Ray:
-- Always start with site:linkedin.com/in
-- Use quotes for exact phrases
-- Use OR between alternatives
-- Include location if relevant
-- Generate different strategies: exact, broad, stack-focused, seniority-focused
+For country use "Israel" if domain/context suggests Israel, otherwise omit.
 
-Make the queries practical and ready to copy-paste.`,
+OUTPUT: Return JSON with linkedin_boolean and google_xray arrays, each item has "label" and "query".`,
     response_json_schema: {
       type: "object",
       properties: {
