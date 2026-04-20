@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
 
   // Step 1: Parse JD into structured data
   const parsed = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `You are an expert technical recruiter. Parse this job description into a structured format.
+    prompt: `You are an expert technical recruiter in Israel. Parse this job description into a structured format for sourcing candidates on LinkedIn and Google.
 
 JOB DESCRIPTION:
 ${job.raw_description}
@@ -21,22 +21,20 @@ ${job.emphasis_notes ? `RECRUITER NOTES: ${job.emphasis_notes}` : ''}
 Extract:
 1. title - the exact job title
 2. seniority - junior/mid/senior/lead/principal/director
-3. must_have - array of MUST HAVE skills/requirements (be specific)
+3. must_have - array of MUST HAVE skills/requirements. Be VERY SPECIFIC with technologies — not "mobile development" but "Kotlin", "Swift", "KMP", "SwiftUI", "Jetpack Compose". Include exact framework and tool names as they appear on LinkedIn profiles.
 4. nice_to_have - array of NICE TO HAVE skills
 5. domain - primary domain (e.g. fintech, consumer, enterprise, etc.)
 6. management_required - boolean, does this role require people management?
-7. alternative_titles - array of equivalent job titles someone might use on their profile
-8. weights - scoring weights object with these categories that sum to 100:
+7. alternative_titles - array of 6-8 equivalent job titles a candidate might use on their LinkedIn profile. Think about how real candidates in Israel write their titles — in English and Hebrew transliteration. E.g. for a Mobile Team Lead: ["Mobile Team Lead", "Android Team Lead", "iOS Team Lead", "Mobile Tech Lead", "Fullstack Team Leader", "Engineering Team Lead", "Mobile Engineering Manager", "Tech Lead Mobile"]
+8. search_keywords - array of 6-8 short keyword combinations (2-3 words each) that would appear on a matching candidate's LinkedIn profile. These should be SPECIFIC and UNIQUE to this role — not generic words like "developer" or "software engineer". E.g. for this role: ["Kotlin Multiplatform", "KMP", "Jetpack Compose", "SwiftUI", "Spring Boot", "microservices", "Clean Architecture", "mobile architecture"]
+9. weights - scoring weights object with these categories that sum to 100:
    - leadership (0-100)
    - primary_stack (0-100) 
    - secondary_stack (0-100)
    - architecture (0-100)
    - cloud_devops (0-100)
    
-The weights should reflect the job's priorities. For example, a Team Lead role should weight leadership higher. A pure IC role should weight technical skills higher.
-
-Be thorough with alternative_titles - include variations like "Team Lead" / "Tech Lead" / "Engineering Lead" etc.
-For must_have and nice_to_have, also include technology synonyms. E.g. if "Backend" is mentioned, also include "Java", "Spring Boot", "APIs" etc. as related terms.`,
+The weights should reflect the job's priorities. A Team Lead role with 50% hands-on should weight both leadership AND technical skills high.`,
     response_json_schema: {
       type: "object",
       properties: {
@@ -47,6 +45,7 @@ For must_have and nice_to_have, also include technology synonyms. E.g. if "Backe
         domain: { type: "string" },
         management_required: { type: "boolean" },
         alternative_titles: { type: "array", items: { type: "string" } },
+        search_keywords: { type: "array", items: { type: "string" } },
         weights: {
           type: "object",
           properties: {
@@ -63,38 +62,40 @@ For must_have and nice_to_have, also include technology synonyms. E.g. if "Backe
 
   // Step 2: Generate search queries
   const queries = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `You are a world-class technical sourcer. Generate PRACTICAL, SHORT Boolean and X-Ray search queries that actually return results on LinkedIn and Google.
+    prompt: `You are a world-class technical sourcer specializing in the Israeli tech market. Generate PRACTICAL Boolean and X-Ray search queries that return highly relevant candidates on LinkedIn and Google.
 
 CRITICAL RULES — follow strictly:
-- LinkedIn Boolean queries MUST be under 200 characters. LinkedIn's search bar truncates long queries and returns 0 results.
-- Google X-Ray queries MUST be under 150 characters. Google ignores long X-Ray queries.
-- Use ONLY 2-3 key terms per query. More terms = fewer results = useless query.
-- Prefer short title keywords over long exact phrases. "Android Lead" beats "Senior Android Team Leader".
-- Never use full sentences. Never use long must_have arrays.
-- Each query must use a DIFFERENT STRATEGY so they return different candidate pools.
+- LinkedIn Boolean queries MUST be under 200 characters. LinkedIn truncates long queries → zero results.
+- Google X-Ray queries MUST be under 180 characters.
+- Use ONLY 2-4 key terms per query. More terms = fewer results.
+- Use EXACT technology names as they appear on LinkedIn profiles (e.g. "Kotlin Multiplatform" not "cross-platform mobile").
+- Each query must use a DIFFERENT STRATEGY to reach different candidate pools.
+- For Israel-based roles: always add "Israel" to Google X-Ray queries.
+- NEVER use generic terms like "software engineer", "developer", "programming" — they return noise.
 
-JOB DATA (extract only the 3-4 most important signals):
+JOB DATA:
 Title: ${parsed.title}
-Key skills: ${(parsed.must_have || []).slice(0, 5).join(', ')}
-Alternative titles: ${(parsed.alternative_titles || []).slice(0, 4).join(', ')}
+Key distinguishing skills (use these — they're specific to this role): ${(parsed.search_keywords || parsed.must_have || []).slice(0, 6).join(', ')}
+Alternative titles: ${(parsed.alternative_titles || []).slice(0, 5).join(', ')}
 Seniority: ${parsed.seniority}
 Domain: ${parsed.domain || ''}
+Management required: ${parsed.management_required ? 'Yes' : 'No'}
 
-Generate 4 linkedin_boolean queries using these strategies:
-1. "Title Focus" — 2-3 title variations only, no skills. E.g: ("Android Team Lead" OR "Mobile Tech Lead" OR "Android Lead")
-2. "Stack + Title" — 1 title keyword AND 2 core skills. E.g: ("Team Lead" OR "Tech Lead") AND (Android OR Kotlin) AND Spring
-3. "Broad Reach" — skills only, no title constraint, catch people with different titles. E.g: (Android OR Kotlin OR iOS) AND (Spring OR Backend) AND Lead
-4. "Seniority Signal" — use seniority words + top 2 skills. E.g: (Senior OR Lead OR Principal) AND Android AND Kotlin
+Generate 5 linkedin_boolean queries using these strategies:
+1. "Title Focus" — 3-4 title variations only. E.g: ("Mobile Team Lead" OR "Android Team Lead" OR "Mobile Tech Lead")
+2. "Primary Stack + Lead" — lead/senior signal AND 2 most unique technical skills for this role
+3. "Unique Tech Combo" — 2-3 very specific technologies that ONLY appear together on profiles matching this role (e.g. KMP AND SwiftUI, or Kotlin AND "Spring Boot" AND Lead)
+4. "Broad Reach" — slightly broader, catches people with non-standard titles but right skills
+5. "Fintech/Domain Signal" — if domain-specific, add domain term + title/skills combo
 
-Generate 4 google_xray queries using these strategies:
-1. "Exact Role" — site:linkedin.com/in + 1 quoted title + 1-2 skills + country
-2. "Stack Search" — site:linkedin.com/in + 2-3 skills + Lead/Senior + country
-3. "Broad Title" — site:linkedin.com/in + multiple title variations (OR) + country
-4. "Skill Combo" — site:linkedin.com/in + unique skill combination that signals this profile type
+Generate 5 google_xray queries using these strategies:
+1. "Exact Role + Israel" — site:linkedin.com/in + quoted title + Israel
+2. "Core Stack + Israel" — site:linkedin.com/in + 2 key technologies + Lead/Senior + Israel  
+3. "Unique Skill Combo" — site:linkedin.com/in + most unique skill combination for this role + Israel
+4. "Title Variations" — site:linkedin.com/in + OR of title variations + Israel
+5. "GitHub/Portfolio Signal" — site:github.com + key technologies for this role (finds active contributors)
 
-For country use "Israel" if domain/context suggests Israel, otherwise omit.
-
-OUTPUT: Return JSON with linkedin_boolean and google_xray arrays, each item has "label" and "query".`,
+OUTPUT: Return JSON with linkedin_boolean and google_xray arrays. Each item: "label" (short strategy name) and "query" (the actual search string, ready to paste).`,
     response_json_schema: {
       type: "object",
       properties: {

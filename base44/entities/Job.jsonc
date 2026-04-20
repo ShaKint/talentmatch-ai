@@ -48,6 +48,13 @@
             "type": "string"
           }
         },
+        "search_keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific keyword combos for sourcing"
+        },
         "weights": {
           "type": "object",
           "properties": {

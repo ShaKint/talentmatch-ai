@@ -274,6 +274,16 @@ export default function JobDetails() {
                     </div>
                   </div>
                 )}
+                {parsed.search_keywords?.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Sourcing Keywords</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {parsed.search_keywords.map((k, i) => (
+                        <span key={i} className="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 text-xs rounded-full font-mono">{k}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
