@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   Search, Wand2, Link as LinkIcon, Users, BadgePercent, Briefcase,
   ChevronRight, Copy, Sparkles, CheckCircle2, AlertCircle, Filter,
-  Target, BrainCircuit, ArrowRight, Loader2, Upload
+  Target, BrainCircuit, ArrowRight, Loader2, Upload, RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -164,6 +164,18 @@ export default function JobDetails() {
     if (profileText.trim()) addMutation.mutate([{ text: profileText }]);
   };
 
+  // ── refresh queries mutation ──
+  const refreshQueriesMutation = useMutation({
+    mutationFn: async () => {
+      await base44.entities.Job.update(jobId, { status: 'parsing' });
+      await base44.functions.invoke('parseJobDescription', { jobId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['job', jobId] });
+      toast({ title: 'שאילתות החיפוש עודכנו' });
+    },
+  });
+
   // ── stat cards ──
   const strongMatches = candidates.filter(c => c.match_result?.recommendation_level === 'strong_fit').length;
   const statCards = [
@@ -298,8 +310,22 @@ export default function JobDetails() {
           {/* Search queries */}
           <Card className="rounded-3xl border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Generated Search Queries</CardTitle>
-              <CardDescription>Use multiple queries — start broad, then narrow by signal quality.</CardDescription>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle>Generated Search Queries</CardTitle>
+                  <CardDescription>Use multiple queries — start broad, then narrow by signal quality.</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-2xl shrink-0"
+                  onClick={() => refreshQueriesMutation.mutate()}
+                  disabled={refreshQueriesMutation.isPending || job.status === 'parsing'}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1.5 ${refreshQueriesMutation.isPending || job.status === 'parsing' ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {job.status === 'parsing' ? (
