@@ -127,6 +127,12 @@ CRITICAL RULES:
 - Be strict but fair
 - overall_score = weighted average of all category scores
 - When scoring tech, note specific version matches/mismatches in strengths/gaps
+- breakdown: object with these EXACT number fields (each 0-100):
+  * core_match (leadership/role fit score)
+  * primary_stack (must_have tech score)
+  * secondary_stack (nice_to_have tech score)
+  * depth_match (architecture/depth score)
+  * cloud_devops (cloud/devops score)
 
 Also provide:
 - category_scores: object with named category scores (e.g. "Leadership": 90, "Mobile": 85, etc.) - use descriptive names relevant to this specific job
@@ -144,10 +150,10 @@ Also provide:
           type: "object",
           properties: {
             core_match: { type: "number" },
-            tech_match: { type: "number" },
+            primary_stack: { type: "number" },
+            secondary_stack: { type: "number" },
             depth_match: { type: "number" },
-            context_match: { type: "number" },
-            signal_quality: { type: "number" }
+            cloud_devops: { type: "number" }
           }
         },
         category_scores: { type: "object" },

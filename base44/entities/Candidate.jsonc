@@ -126,16 +126,16 @@
             "core_match": {
               "type": "number"
             },
-            "tech_match": {
+            "primary_stack": {
+              "type": "number"
+            },
+            "secondary_stack": {
               "type": "number"
             },
             "depth_match": {
               "type": "number"
             },
-            "context_match": {
-              "type": "number"
-            },
-            "signal_quality": {
+            "cloud_devops": {
               "type": "number"
             }
           }
