@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import CandidateBreakdown from '@/components/candidate/CandidateBreakdown';
+import EditableParsedRequirements from '@/components/job/EditableParsedRequirements';
 
 // ── small helpers ──────────────────────────────────────────────────────────────
 
@@ -233,86 +234,7 @@ export default function JobDetails() {
         {/* LEFT: inputs */}
         <div className="xl:col-span-5 space-y-6">
 
-          {/* Parsed requirements */}
-          {parsed.must_have && (
-            <Card className="rounded-3xl border-slate-200 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-slate-100 p-2"><Wand2 className="h-5 w-5" /></div>
-                  <div>
-                    <CardTitle>Parsed Requirements</CardTitle>
-                    <CardDescription>AI extracted from job description</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Must Have</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {parsed.must_have.map((s, i) => (
-                      <span key={i} className="px-2.5 py-1 bg-slate-900 text-white text-xs rounded-full">{s}</span>
-                    ))}
-                  </div>
-                </div>
-                {parsed.nice_to_have?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Nice to Have</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {parsed.nice_to_have.map((s, i) => (
-                        <span key={i} className="px-2.5 py-1 border border-slate-200 text-slate-700 text-xs rounded-full">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {parsed.alternative_titles?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Alternative Titles</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {parsed.alternative_titles.map((t, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs rounded-full">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {parsed.search_keywords?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Sourcing Keywords</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {parsed.search_keywords.map((k, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 text-xs rounded-full font-mono">{k}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Fit weights */}
-          {parsed.weights && (
-            <Card className="rounded-3xl border-slate-200 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-slate-100 p-2"><Filter className="h-5 w-5" /></div>
-                  <div>
-                    <CardTitle>Fit Weights</CardTitle>
-                    <CardDescription>Scoring weights auto-configured for this role</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {Object.entries(parsed.weights).map(([key, value]) => (
-                  <div key={key} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="capitalize text-slate-700">{key.replace(/_/g, ' ')}</span>
-                      <span className="font-semibold">{value}%</span>
-                    </div>
-                    <Progress value={value} className="h-2" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+          <EditableParsedRequirements job={job} jobId={jobId} />
 
           {/* Add candidates */}
           <Card className="rounded-3xl border-slate-200 shadow-sm">
