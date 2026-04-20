@@ -25,15 +25,16 @@ export default function JobDetails() {
   const { data: job, isLoading } = useQuery({
     queryKey: ['job', id],
     queryFn: () => base44.entities.Job.get(id),
-    refetchInterval: (data) => data?.status === 'parsing' ? 3000 : false,
+    refetchInterval: (query) => query.state.data?.status === 'parsing' ? 3000 : false,
   });
 
   const { data: candidates = [] } = useQuery({
     queryKey: ['candidates', id],
     queryFn: () => base44.entities.Candidate.filter({ job_id: id }),
     enabled: !!id,
-    refetchInterval: (data) => {
-      const hasPending = (data || []).some(c => c.status === 'pending' || !c.match_result);
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      const hasPending = Array.isArray(data) && data.some(c => c.status === 'pending' || !c.match_result);
       return hasPending ? 3000 : false;
     },
   });
