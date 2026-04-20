@@ -16,11 +16,22 @@ Deno.serve(async (req) => {
   };
   if (githubToken) headers['Authorization'] = `Bearer ${githubToken}`;
 
+  // Location expansion — GitHub users write their location in many ways
+  const locationExpansions = {
+    'Israel': 'Israel OR "Tel Aviv" OR "TLV" OR "Haifa" OR "Jerusalem" OR "Herzliya" OR "Beer Sheva" OR "Ramat Gan" OR "Petah Tikva" OR "Netanya"',
+    'Tel Aviv': '"Tel Aviv" OR "TLV" OR "Tel-Aviv"',
+    'Haifa': 'Haifa OR חיפה',
+    'Jerusalem': 'Jerusalem OR "ירושלים"',
+  };
+
   // Build query
   let q = '';
   if (keywords) q += keywords + ' ';
   if (language) q += `language:${language} `;
-  if (location) q += `location:${location} `;
+  if (location) {
+    const expanded = locationExpansions[location] || location;
+    q += `location:${expanded} `;
+  }
   if (minFollowers) q += `followers:>=${minFollowers} `;
   q = q.trim() || 'type:user';
 

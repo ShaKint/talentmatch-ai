@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Github, Search, Loader2, AlertCircle, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Github, Search, Loader2, AlertCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Wand2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GithubCandidateCard from '@/components/sourcing/GithubCandidateCard';
 
@@ -56,6 +56,27 @@ export default function Sourcing() {
   const handleSearch = () => {
     setPage(1);
     setSubmittedFilters({ ...filters });
+  };
+
+  // Auto-fill filters from selected job's parsed data
+  const handleSearchByJob = () => {
+    const job = jobs.find(j => j.id === selectedJobId);
+    if (!job?.parsed_data) return;
+    const pd = job.parsed_data;
+    const topSkills = (pd.must_have || []).slice(0, 3).join(' ');
+    const lang = pd.must_have?.find(s =>
+      LANGUAGES.map(l => l.toLowerCase()).includes(s.toLowerCase())
+    ) || '';
+    const newFilters = {
+      keywords: topSkills,
+      language: lang,
+      location: 'Israel',
+      minFollowers: filters.minFollowers,
+      sort: 'followers',
+    };
+    setFilters(newFilters);
+    setPage(1);
+    setSubmittedFilters(newFilters);
   };
 
   const handleImport = async (ghUser) => {
@@ -166,15 +187,25 @@ export default function Sourcing() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-3">
+          <div className="flex flex-col sm:flex-row gap-3 mt-3 items-center">
             <Select value={selectedJobId} onValueChange={setSelectedJobId}>
               <SelectTrigger className="rounded-xl sm:max-w-xs">
-                <SelectValue placeholder="ייבא מועמדים למשרה..." />
+                <SelectValue placeholder="בחר משרה..." />
               </SelectTrigger>
               <SelectContent>
                 {jobs.map(j => <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>)}
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              className="rounded-xl px-4 border-primary/40 text-primary hover:bg-primary/5"
+              onClick={handleSearchByJob}
+              disabled={!selectedJobId || isLoading || isFetching}
+              title="חפש אוטומטית לפי דרישות המשרה"
+            >
+              <Wand2 className="h-4 w-4 mr-2" />
+              חפש לפי המשרה
+            </Button>
             <Button
               className="rounded-xl px-6"
               onClick={handleSearch}
