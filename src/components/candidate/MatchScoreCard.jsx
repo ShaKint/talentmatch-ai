@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { User, Linkedin, Loader2 } from 'lucide-react';
+import { Linkedin, Loader2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const levelConfig = {
   strong_fit: { label: 'מתאים מאוד', className: 'bg-green-100 text-green-700 border-green-200' },
@@ -58,14 +61,31 @@ export default function MatchScoreCard({ candidate, index = 0 }) {
   const profile = candidate.parsed_profile;
   const isPending = candidate.status === 'pending' || !match;
   const level = levelConfig[match?.recommendation_level] || levelConfig.partial_fit;
+  const [deleting, setDeleting] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    if (!confirm(`למחוק את ${profile?.name || 'המועמד'}?`)) return;
+    setDeleting(true);
+    await base44.entities.Candidate.delete(candidate.id);
+    queryClient.invalidateQueries({ queryKey: ['candidates', candidate.job_id] });
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-card rounded-2xl border border-border p-5 hover:shadow-md hover:border-primary/30 transition-all duration-300"
+      className={`bg-card rounded-2xl border border-border p-5 hover:shadow-md hover:border-primary/30 transition-all duration-300 relative group ${deleting ? 'opacity-50 pointer-events-none' : ''}`}
     >
+      <button
+        onClick={handleDelete}
+        className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <Avatar name={profile?.name} />
