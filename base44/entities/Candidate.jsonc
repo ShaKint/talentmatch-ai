@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Raw profile text or scraped data"
     },
+    "recruiter_notes": {
+      "type": "string",
+      "description": "Manual recruiter notes and observations"
+    },
     "parsed_profile": {
       "type": "object",
       "description": "Structured profile data",
@@ -39,6 +43,41 @@
             "type": "string"
           }
         },
+        "tech_stack_detailed": {
+          "type": "object",
+          "properties": {
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frameworks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "databases": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "cloud": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
         "experience_years": {
           "type": "number"
         },
@@ -61,6 +100,12 @@
           "type": "string"
         },
         "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "soft_skills": {
           "type": "array",
           "items": {
             "type": "string"
@@ -97,6 +142,29 @@
         },
         "category_scores": {
           "type": "object"
+        },
+        "tech_comparison": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "string"
+              },
+              "candidate_has": {
+                "type": "string"
+              },
+              "match_level": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "soft_skills_assessment": {
+          "type": "string"
         },
         "strengths": {
           "type": "array",

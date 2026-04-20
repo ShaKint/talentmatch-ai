@@ -18,6 +18,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
+import CandidateBreakdown from '@/components/candidate/CandidateBreakdown';
 
 // ── small helpers ──────────────────────────────────────────────────────────────
 
@@ -471,64 +472,10 @@ export default function JobDetails() {
                 <Card className="rounded-3xl border-slate-200 shadow-sm 2xl:col-span-2">
                   <CardHeader>
                     <CardTitle>Candidate Breakdown</CardTitle>
-                    <CardDescription>Explainability layer for recruiter confidence</CardDescription>
+                    <CardDescription>Tech stack, soft skills & recruiter notes</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ScrollArea className="h-[520px] pr-3">
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <h3 className="text-lg font-semibold">{selected.parsed_profile?.name || 'מועמד'}</h3>
-                            <p className="text-sm text-slate-600">{selected.parsed_profile?.headline || ''}</p>
-                          </div>
-                          <ScoreBadge score={selected.match_result?.overall_score || 0} />
-                        </div>
-
-                        <Separator />
-
-                        {selected.match_result?.category_scores && (
-                          <div className="space-y-4">
-                            <h4 className="text-sm font-semibold">Score Breakdown</h4>
-                            {Object.entries(selected.match_result.category_scores).map(([k, v]) => (
-                              <BreakdownBar key={k} label={k} value={v} />
-                            ))}
-                          </div>
-                        )}
-
-                        <Separator />
-
-                        {selected.match_result?.strengths?.length > 0 && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold">Why this candidate fits</h4>
-                            {selected.match_result.strengths.map((item, i) => (
-                              <div key={i} className="flex items-start gap-2 rounded-2xl border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                                <span>{item}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {selected.match_result?.gaps?.length > 0 && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold">Gaps / unknowns</h4>
-                            {selected.match_result.gaps.map((item, i) => (
-                              <div key={i} className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                                <span>{item}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {selected.match_result?.recommendation && (
-                          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Recommended next step</h4>
-                            <p className="text-sm leading-6 text-slate-700">{selected.match_result.recommendation}</p>
-                          </div>
-                        )}
-                      </div>
-                    </ScrollArea>
+                    <CandidateBreakdown candidate={selected} jobId={jobId} />
                   </CardContent>
                 </Card>
               )}
