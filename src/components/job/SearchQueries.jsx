@@ -56,8 +56,6 @@ export default function SearchQueries({ queries, jobId }) {
     toast({ title: 'שאילתות חודשו!' });
   };
 
-  if (!queries) return null;
-
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-5 border-b border-border flex items-center justify-between">
@@ -70,24 +68,30 @@ export default function SearchQueries({ queries, jobId }) {
           {refreshing ? 'מייצר...' : 'רענן שאילתות'}
         </Button>
       </div>
-      <div className="p-5">
-        <Tabs defaultValue="linkedin" dir="rtl">
-          <TabsList className="bg-secondary mb-4">
-            <TabsTrigger value="linkedin">LinkedIn Boolean</TabsTrigger>
-            <TabsTrigger value="xray">Google X-Ray</TabsTrigger>
-          </TabsList>
-          <TabsContent value="linkedin" className="space-y-3">
-            {queries.linkedin_boolean?.map((q, i) => (
-              <QueryCard key={i} query={q} type="linkedin" />
-            ))}
-          </TabsContent>
-          <TabsContent value="xray" className="space-y-3">
-            {queries.google_xray?.map((q, i) => (
-              <QueryCard key={i} query={q} type="xray" />
-            ))}
-          </TabsContent>
-        </Tabs>
-      </div>
+      {queries ? (
+        <div className="p-5">
+          <Tabs defaultValue="linkedin" dir="rtl">
+            <TabsList className="bg-secondary mb-4">
+              <TabsTrigger value="linkedin">LinkedIn Boolean</TabsTrigger>
+              <TabsTrigger value="xray">Google X-Ray</TabsTrigger>
+            </TabsList>
+            <TabsContent value="linkedin" className="space-y-3">
+              {queries.linkedin_boolean?.map((q, i) => (
+                <QueryCard key={i} query={q} type="linkedin" />
+              ))}
+            </TabsContent>
+            <TabsContent value="xray" className="space-y-3">
+              {queries.google_xray?.map((q, i) => (
+                <QueryCard key={i} query={q} type="xray" />
+              ))}
+            </TabsContent>
+          </Tabs>
+        </div>
+      ) : (
+        <div className="px-5 pb-5 pt-3 text-sm text-muted-foreground">
+          אין שאילתות עדיין. לחץ "רענן שאילתות" או השתמש בסיכום החופשי למטה.
+        </div>
+      )}
       <RecruiterSummaryInput jobId={jobId} />
     </div>
   );

@@ -81,7 +81,7 @@ export default function MatchScoreCard({ candidate, index = 0 }) {
     >
       <button
         onClick={handleDelete}
-        className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
       >
         <Trash2 className="w-4 h-4" />
       </button>

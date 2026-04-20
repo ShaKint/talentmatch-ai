@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ const statusConfig = {
 export default function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: job, isLoading } = useQuery({
     queryKey: ['job', id],
@@ -31,11 +32,25 @@ export default function JobDetails() {
     queryKey: ['candidates', id],
     queryFn: () => base44.entities.Candidate.filter({ job_id: id }),
     enabled: !!id,
+    refetchInterval: (data) => {
+      const hasPending = (data || []).some(c => c.status === 'pending' || !c.match_result);
+      return hasPending ? 3000 : false;
+    },
   });
 
   const sortedCandidates = [...candidates].sort(
     (a, b) => (b.match_result?.overall_score || 0) - (a.match_result?.overall_score || 0)
   );
+
+  // Real-time: refresh candidates whenever any candidate is updated
+  useEffect(() => {
+    const unsubscribe = base44.entities.Candidate.subscribe((event) => {
+      if (event.type === 'update' || event.type === 'create') {
+        queryClient.invalidateQueries({ queryKey: ['candidates', id] });
+      }
+    });
+    return unsubscribe;
+  }, [id, queryClient]);
 
   const handleReparse = async () => {
     await base44.functions.invoke('parseJobDescription', { jobId: id });
@@ -92,7 +107,7 @@ export default function JobDetails() {
         {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
           <EditableParsedRequirements job={job} jobId={id} />
-          {job.generated_queries && <SearchQueries queries={job.generated_queries} jobId={id} />}
+          <SearchQueries queries={job.generated_queries} jobId={id} />
 
           {/* Candidates */}
           <div className="bg-card rounded-xl border border-border overflow-hidden">
