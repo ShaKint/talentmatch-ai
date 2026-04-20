@@ -7,6 +7,38 @@ import { Input } from '@/components/ui/input';
 import { Wand2, Filter, Plus, X, Pencil, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
+function WeightInputRow({ onAdd }) {
+  const [adding, setAdding] = useState(false);
+  const [newLabel, setNewLabel] = useState('');
+
+  const handleAdd = () => {
+    if (newLabel.trim()) {
+      onAdd(newLabel.trim());
+      setNewLabel('');
+      setAdding(false);
+    }
+  };
+
+  return adding ? (
+    <div className="flex items-center gap-2">
+      <Input
+        autoFocus
+        placeholder="שם הקטגוריה (eg. mobile_development)"
+        value={newLabel}
+        onChange={e => setNewLabel(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewLabel(''); } }}
+        className="h-8 text-xs flex-1"
+      />
+      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={handleAdd}><Check className="w-3.5 h-3.5 text-green-600" /></Button>
+      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setAdding(false); setNewLabel(''); }}><X className="w-3.5 h-3.5 text-slate-400" /></Button>
+    </div>
+  ) : (
+    <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full border border-dashed border-slate-300 text-slate-400 hover:border-slate-500 hover:text-slate-600 transition-colors">
+      <Plus className="w-3 h-3" /> הוסף קטגוריה
+    </button>
+  );
+}
+
 function TagList({ items = [], color, onAdd, onRemove }) {
   const [adding, setAdding] = useState(false);
   const [newVal, setNewVal] = useState('');
@@ -50,7 +82,7 @@ function TagList({ items = [], color, onAdd, onRemove }) {
   );
 }
 
-function WeightRow({ label, value, onChange }) {
+function WeightRow({ label, value, onChange, onRemove, isEditable = true }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(value);
 
@@ -84,6 +116,11 @@ function WeightRow({ label, value, onChange }) {
               <Pencil className="w-3.5 h-3.5 text-slate-400" />
             </Button>
           </>
+        )}
+        {isEditable && onRemove && (
+          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={onRemove}>
+            <X className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
+          </Button>
         )}
       </div>
     </div>
@@ -121,6 +158,18 @@ export default function EditableParsedRequirements({ job, jobId }) {
 
   const updateWeight = (key, val) => {
     const weights = { ...(parsed.weights || {}), [key]: val };
+    save({ weights });
+  };
+
+  const addWeight = (newLabel) => {
+    if (!newLabel.trim()) return;
+    const weights = { ...(parsed.weights || {}), [newLabel.trim()]: 0 };
+    save({ weights });
+  };
+
+  const removeWeight = (key) => {
+    const weights = { ...(parsed.weights || {}) };
+    delete weights[key];
     save({ weights });
   };
 
@@ -191,7 +240,7 @@ export default function EditableParsedRequirements({ job, jobId }) {
               <div className="rounded-2xl bg-slate-100 p-2"><Filter className="h-5 w-5" /></div>
               <div>
                 <CardTitle>Fit Weights</CardTitle>
-                <CardDescription>לחץ על עיפרון לעריכת משקל</CardDescription>
+                <CardDescription>ערוך משקלים, הוסף או הסר קטגוריות</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -202,8 +251,11 @@ export default function EditableParsedRequirements({ job, jobId }) {
                 label={key}
                 value={value}
                 onChange={val => updateWeight(key, val)}
+                onRemove={() => removeWeight(key)}
+                isEditable={true}
               />
             ))}
+            <WeightInputRow onAdd={addWeight} />
           </CardContent>
         </Card>
       )}
