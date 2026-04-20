@@ -1,0 +1,126 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "raw_description": {
+      "type": "string",
+      "description": "Full job description text"
+    },
+    "emphasis_notes": {
+      "type": "string",
+      "description": "Additional emphasis/notes from recruiter"
+    },
+    "parsed_data": {
+      "type": "object",
+      "description": "Structured parsed job data from AI",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "seniority": {
+          "type": "string"
+        },
+        "must_have": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nice_to_have": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "domain": {
+          "type": "string"
+        },
+        "management_required": {
+          "type": "boolean"
+        },
+        "alternative_titles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "weights": {
+          "type": "object",
+          "properties": {
+            "leadership": {
+              "type": "number"
+            },
+            "primary_stack": {
+              "type": "number"
+            },
+            "secondary_stack": {
+              "type": "number"
+            },
+            "architecture": {
+              "type": "number"
+            },
+            "cloud_devops": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "generated_queries": {
+      "type": "object",
+      "description": "Generated search queries",
+      "properties": {
+        "linkedin_boolean": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "google_xray": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "parsing",
+        "active",
+        "closed"
+      ],
+      "default": "draft"
+    },
+    "candidate_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "raw_description"
+  ]
+}

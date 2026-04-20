@@ -1,0 +1,136 @@
+{
+  "name": "Candidate",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Associated job ID"
+    },
+    "profile_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
+    "raw_text": {
+      "type": "string",
+      "description": "Raw profile text or scraped data"
+    },
+    "parsed_profile": {
+      "type": "object",
+      "description": "Structured profile data",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "headline": {
+          "type": "string"
+        },
+        "about": {
+          "type": "string"
+        },
+        "companies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "experience_years": {
+          "type": "number"
+        },
+        "management_years": {
+          "type": "number"
+        },
+        "hands_on": {
+          "type": "boolean"
+        },
+        "seniority": {
+          "type": "string"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "education": {
+          "type": "string"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "match_result": {
+      "type": "object",
+      "description": "Match scoring result",
+      "properties": {
+        "overall_score": {
+          "type": "number"
+        },
+        "breakdown": {
+          "type": "object",
+          "properties": {
+            "core_match": {
+              "type": "number"
+            },
+            "tech_match": {
+              "type": "number"
+            },
+            "depth_match": {
+              "type": "number"
+            },
+            "context_match": {
+              "type": "number"
+            },
+            "signal_quality": {
+              "type": "number"
+            }
+          }
+        },
+        "category_scores": {
+          "type": "object"
+        },
+        "strengths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommendation": {
+          "type": "string"
+        },
+        "recommendation_level": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "analyzed",
+        "matched",
+        "contacted",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "job_id"
+  ]
+}
