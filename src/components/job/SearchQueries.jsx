@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Globe, Copy, Check } from 'lucide-react';
+import { Search, Globe, Copy, Check, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { base44 } from '@/api/base44Client';
+import { useQueryClient } from '@tanstack/react-query';
 
 function QueryCard({ query, type }) {
   const [copied, setCopied] = useState(false);
@@ -40,16 +42,32 @@ function QueryCard({ query, type }) {
   );
 }
 
-export default function SearchQueries({ queries }) {
+export default function SearchQueries({ queries, jobId }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await base44.functions.invoke('parseJobDescription', { jobId });
+    queryClient.invalidateQueries({ queryKey: ['job', jobId] });
+    setRefreshing(false);
+    toast({ title: 'שאילתות חודשו!' });
+  };
+
   if (!queries) return null;
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-5 border-b border-border">
+      <div className="p-5 border-b border-border flex items-center justify-between">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           <Search className="w-4 h-4 text-primary" />
           שאילתות חיפוש
         </h3>
+        <Button variant="outline" size="sm" className="gap-2" onClick={handleRefresh} disabled={refreshing}>
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'מייצר...' : 'רענן שאילתות'}
+        </Button>
       </div>
       <div className="p-5">
         <Tabs defaultValue="linkedin" dir="rtl">

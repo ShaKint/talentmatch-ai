@@ -81,7 +81,7 @@ export default function JobDetails() {
         {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
           <EditableParsedRequirements job={job} jobId={id} />
-          {job.generated_queries && <SearchQueries queries={job.generated_queries} />}
+          {job.generated_queries && <SearchQueries queries={job.generated_queries} jobId={id} />}
         </div>
 
         {/* Right column */}
