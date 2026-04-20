@@ -6,6 +6,7 @@ import { Search, Globe, Copy, Check, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
+import RecruiterSummaryInput from './RecruiterSummaryInput';
 
 function QueryCard({ query, type }) {
   const [copied, setCopied] = useState(false);
@@ -87,6 +88,7 @@ export default function SearchQueries({ queries, jobId }) {
           </TabsContent>
         </Tabs>
       </div>
+      <RecruiterSummaryInput jobId={jobId} />
     </div>
   );
 }
