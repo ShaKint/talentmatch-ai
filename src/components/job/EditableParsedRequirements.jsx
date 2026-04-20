@@ -124,13 +124,10 @@ export default function EditableParsedRequirements({ job, jobId }) {
     save({ weights });
   };
 
-  if (!parsed.must_have && !parsed.weights) return null;
-
   return (
     <>
       {/* Parsed Requirements */}
-      {parsed.must_have && (
-        <Card className="rounded-3xl border-slate-200 shadow-sm">
+      <Card className="rounded-3xl border-slate-200 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="rounded-2xl bg-slate-100 p-2"><Wand2 className="h-5 w-5" /></div>
@@ -144,7 +141,7 @@ export default function EditableParsedRequirements({ job, jobId }) {
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Must Have</p>
               <TagList
-                items={parsed.must_have}
+                items={parsed.must_have || []}
                 color="bg-slate-900 text-white"
                 onAdd={item => addItem('must_have', item)}
                 onRemove={idx => removeItem('must_have', idx)}
@@ -185,7 +182,6 @@ export default function EditableParsedRequirements({ job, jobId }) {
             )}
           </CardContent>
         </Card>
-      )}
 
       {/* Fit Weights */}
       {parsed.weights && (

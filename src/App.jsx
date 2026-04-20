@@ -10,7 +10,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import Dashboard from '@/pages/Dashboard';
 import Jobs from '@/pages/Jobs';
 import NewJob from '@/pages/NewJob';
-import JobDetails from '@/pages/JobDetails.jsx';
+import JobDetails from '@/pages/JobDetails';
 import Candidates from '@/pages/Candidates';
 import Sourcing from '@/pages/Sourcing';
 
