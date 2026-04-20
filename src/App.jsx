@@ -12,6 +12,7 @@ import Jobs from '@/pages/Jobs';
 import NewJob from '@/pages/NewJob';
 import JobDetails from '@/pages/JobDetails';
 import Candidates from '@/pages/Candidates';
+import Sourcing from '@/pages/Sourcing';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/candidates" element={<Candidates />} />
+        <Route path="/sourcing" element={<Sourcing />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
