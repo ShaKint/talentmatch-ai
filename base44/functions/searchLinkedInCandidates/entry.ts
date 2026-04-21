@@ -1,7 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const GOOGLE_CX = 'a06ccce12bd2f4d96';
-
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
@@ -13,8 +11,11 @@ Deno.serve(async (req) => {
   const apiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
   if (!apiKey) return Response.json({ error: 'GOOGLE_SEARCH_API_KEY not set' }, { status: 500 });
 
+  const cx = Deno.env.get('GOOGLE_SEARCH_CX');
+  if (!cx) return Response.json({ error: 'GOOGLE_SEARCH_CX not set' }, { status: 500 });
+
   const startIndex = start || 1;
-  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&start=${startIndex}&num=10`;
+  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}&start=${startIndex}&num=10`;
 
   const res = await fetch(url);
   const data = await res.json();
