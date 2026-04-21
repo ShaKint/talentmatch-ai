@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, Globe, ChevronRight, ChevronLeft, Linkedin } from 'lucide-react';
+import { Search, Loader2, Globe, ChevronRight, ChevronLeft, Linkedin, Zap } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 function ResultCard({ item }) {
@@ -40,14 +40,34 @@ function ResultCard({ item }) {
 }
 
 export default function AutoSourceCandidates({ job }) {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [activeQuery, setActiveQuery] = useState(null);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(null);
-  const { toast } = useToast();
+   const [results, setResults] = useState([]);
+   const [loading, setLoading] = useState(false);
+   const [activeQuery, setActiveQuery] = useState(null);
+   const [page, setPage] = useState(1);
+   const [total, setTotal] = useState(null);
+   const [autoLoading, setAutoLoading] = useState(false);
+   const { toast } = useToast();
 
-  const queries = job?.generated_queries?.google_xray || [];
+   const queries = job?.generated_queries?.google_xray || [];
+
+   const handleAutoSource = async () => {
+     setAutoLoading(true);
+     try {
+       const res = await base44.functions.invoke('autoSourceAndAnalyzeCandidates', { jobId: job.id });
+       toast({
+         title: 'סיום אוטו-sourcing',
+         description: `נמצאו ונוספו ${res.data.total} מועמדים לניתוח`
+       });
+     } catch (error) {
+       toast({
+         title: 'שגיאה',
+         description: error.message,
+         variant: 'destructive'
+       });
+     } finally {
+       setAutoLoading(false);
+     }
+   };
 
   const runSearch = async (query, startPage = 1) => {
     setLoading(true);
@@ -81,10 +101,22 @@ export default function AutoSourceCandidates({ job }) {
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-5 border-b border-border flex items-center gap-2">
-        <Search className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-foreground">חיפוש אוטומטי - Google X-Ray</h3>
-      </div>
+      <div className="p-5 border-b border-border flex items-center justify-between">
+         <div className="flex items-center gap-2">
+           <Search className="w-4 h-4 text-primary" />
+           <h3 className="font-semibold text-foreground">חיפוש אוטומטי - Google X-Ray</h3>
+         </div>
+         <Button
+           variant="accent"
+           size="sm"
+           onClick={handleAutoSource}
+           disabled={autoLoading}
+           className="gap-1"
+         >
+           <Zap className="w-3.5 h-3.5" />
+           {autoLoading ? 'בהפעלה...' : 'הפעל אוטו'}
+         </Button>
+       </div>
 
       <div className="p-5 space-y-4">
         {/* Query buttons */}
