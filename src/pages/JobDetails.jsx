@@ -9,6 +9,7 @@ import EditableParsedRequirements from '@/components/job/EditableParsedRequireme
 import SearchQueries from '@/components/job/SearchQueries';
 import AddCandidates from '@/components/job/AddCandidates';
 import MatchScoreCard from '@/components/candidate/MatchScoreCard';
+import LatestAnalyzedCandidate from '@/components/candidate/LatestAnalyzedCandidate';
 
 const statusConfig = {
   draft: { label: 'טיוטה', className: 'bg-secondary text-secondary-foreground' },
@@ -134,18 +135,7 @@ export default function JobDetails() {
         {/* Right column */}
         <div className="space-y-6">
           <AddCandidates jobId={id} />
-          {job.raw_description && (
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <h3 className="font-semibold text-sm text-foreground">תיאור המשרה</h3>
-              </div>
-              <div className="p-4">
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {job.raw_description}
-                </p>
-              </div>
-            </div>
-          )}
+          <LatestAnalyzedCandidate candidates={candidates} />
         </div>
       </div>
     </div>
