@@ -10,55 +10,83 @@ Deno.serve(async (req) => {
   const job = await base44.entities.Job.get(jobId);
 
   // Step 1: Parse JD into structured data
-  const parsed = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `You are an expert technical recruiter in Israel. Parse this job description into a structured format for sourcing candidates on LinkedIn and Google.
+   const parsed = await base44.asServiceRole.integrations.Core.InvokeLLM({
+     prompt: `You are an expert technical recruiter in Israel. Parse this job description into a structured format for sourcing candidates on LinkedIn and Google.
 
-JOB DESCRIPTION:
-${job.raw_description}
+  JOB DESCRIPTION:
+  ${job.raw_description}
 
-${job.emphasis_notes ? `RECRUITER NOTES: ${job.emphasis_notes}` : ''}
+  ${job.emphasis_notes ? `RECRUITER NOTES: ${job.emphasis_notes}` : ''}
 
-Extract:
-1. title - the exact job title
-2. seniority - junior/mid/senior/lead/principal/director
-3. must_have - array of MUST HAVE skills/requirements. Be VERY SPECIFIC with technologies — not "mobile development" but "Kotlin", "Swift", "KMP", "SwiftUI", "Jetpack Compose". Include exact framework and tool names as they appear on LinkedIn profiles.
-4. nice_to_have - array of NICE TO HAVE skills
-5. domain - primary domain (e.g. fintech, consumer, enterprise, etc.)
-6. management_required - boolean, does this role require people management?
-7. alternative_titles - array of 6-8 equivalent job titles a candidate might use on their LinkedIn profile. Think about how real candidates in Israel write their titles — in English and Hebrew transliteration. E.g. for a Mobile Team Lead: ["Mobile Team Lead", "Android Team Lead", "iOS Team Lead", "Mobile Tech Lead", "Fullstack Team Leader", "Engineering Team Lead", "Mobile Engineering Manager", "Tech Lead Mobile"]
-8. search_keywords - array of 6-8 short keyword combinations (2-3 words each) that would appear on a matching candidate's LinkedIn profile. These should be SPECIFIC and UNIQUE to this role — not generic words like "developer" or "software engineer". E.g. for this role: ["Kotlin Multiplatform", "KMP", "Jetpack Compose", "SwiftUI", "Spring Boot", "microservices", "Clean Architecture", "mobile architecture"]
-9. weights - scoring weights object with these categories that sum to 100:
-   - leadership (0-100)
-   - primary_stack (0-100) 
-   - secondary_stack (0-100)
-   - architecture (0-100)
-   - cloud_devops (0-100)
-   
-The weights should reflect the job's priorities. A Team Lead role with 50% hands-on should weight both leadership AND technical skills high.`,
-    response_json_schema: {
-      type: "object",
-      properties: {
-        title: { type: "string" },
-        seniority: { type: "string" },
-        must_have: { type: "array", items: { type: "string" } },
-        nice_to_have: { type: "array", items: { type: "string" } },
-        domain: { type: "string" },
-        management_required: { type: "boolean" },
-        alternative_titles: { type: "array", items: { type: "string" } },
-        search_keywords: { type: "array", items: { type: "string" } },
-        weights: {
-          type: "object",
-          properties: {
-            leadership: { type: "number" },
-            primary_stack: { type: "number" },
-            secondary_stack: { type: "number" },
-            architecture: { type: "number" },
-            cloud_devops: { type: "number" }
-          }
-        }
-      }
-    }
-  });
+  Extract:
+  1. title - the exact job title
+  2. seniority - junior/mid/senior/lead/principal/director
+  3. must_have - array of MUST HAVE skills/requirements. Each item should be an OBJECT with:
+   - skill: the skill/technology name (SPECIFIC - "Kotlin" not "mobile development")
+   - min_experience_years: approximate minimum years needed to be competent (this is a PROXY for depth, not a hard cutoff)
+   - flexibility_level: "high" (can substitute with similar), "medium" (some flexibility), or "low" (hard requirement)
+   - context: explain what this skill REALLY means for this role (e.g., "Lead-level Kotlin for complex architecture" or "Hands-on Java experience for backend development")
+   - alternatives: array of 2-3 similar skills that could work instead
+  4. nice_to_have - array of NICE TO HAVE skills, same structure as must_have
+  5. domain - primary domain (e.g. fintech, consumer, enterprise, etc.)
+  6. management_required - boolean, does this role require people management?
+  7. alternative_titles - array of 6-8 equivalent job titles a candidate might use on their LinkedIn profile
+  8. search_keywords - array of 6-8 short keyword combinations (2-3 words each)
+  9. weights - scoring weights object with these categories that sum to 100:
+    - leadership (0-100)
+    - primary_stack (0-100) 
+    - secondary_stack (0-100)
+    - architecture (0-100)
+    - cloud_devops (0-100)
+
+  IMPORTANT: When extracting years of experience like "10 years of Kotlin", translate that to min_experience_years, but also explain the CONTEXT of what that really means for the role. Years are a proxy — 9 years might be perfectly fine if the depth is there.`,
+     response_json_schema: {
+       type: "object",
+       properties: {
+         title: { type: "string" },
+         seniority: { type: "string" },
+         must_have: {
+           type: "array",
+           items: {
+             type: "object",
+             properties: {
+               skill: { type: "string" },
+               min_experience_years: { type: "number" },
+               flexibility_level: { type: "string", enum: ["high", "medium", "low"] },
+               context: { type: "string" },
+               alternatives: { type: "array", items: { type: "string" } }
+             }
+           }
+         },
+         nice_to_have: {
+           type: "array",
+           items: {
+             type: "object",
+             properties: {
+               skill: { type: "string" },
+               min_experience_years: { type: "number" },
+               context: { type: "string" },
+               alternatives: { type: "array", items: { type: "string" } }
+             }
+           }
+         },
+         domain: { type: "string" },
+         management_required: { type: "boolean" },
+         alternative_titles: { type: "array", items: { type: "string" } },
+         search_keywords: { type: "array", items: { type: "string" } },
+         weights: {
+           type: "object",
+           properties: {
+             leadership: { type: "number" },
+             primary_stack: { type: "number" },
+             secondary_stack: { type: "number" },
+             architecture: { type: "number" },
+             cloud_devops: { type: "number" }
+           }
+         }
+       }
+     }
+   });
 
   // Extract location constraints from must_have
   const locationKeywords = ['israel', 'tel aviv', 'jerusalem', 'haifa', 'remote', 'hybrid', 'on-site', 'onsite', 'usa', 'uk', 'europe', 'new york', 'london', 'berlin', 'amsterdam'];
@@ -84,7 +112,8 @@ CRITICAL RULES — follow strictly:
 
 JOB DATA:
 Title: ${parsed.title}
-Key distinguishing skills (use these — they're specific to this role): ${(parsed.search_keywords || parsed.must_have || []).slice(0, 6).join(', ')}
+Key distinguishing skills (use these — they're specific to this role): ${(parsed.search_keywords || []).slice(0, 6).join(', ')}
+Must-have skills: ${(parsed.must_have || []).map(m => m.skill).slice(0, 5).join(', ')}
 Alternative titles: ${(parsed.alternative_titles || []).slice(0, 5).join(', ')}
 Seniority: ${parsed.seniority}
 Domain: ${parsed.domain || ''}
