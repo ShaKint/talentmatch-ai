@@ -76,72 +76,83 @@ If it says "Python 3" or "Python 3.9", output exactly that.`,
   });
 
   // Step 2: Run matching engine
-  const matchResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `You are a precise recruiting matching engine. Score this candidate against this job using a weighted scoring model.
+   const matchResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+     prompt: `You are a precise recruiting matching engine. Score this candidate against this job using a weighted scoring model.
 
-JOB REQUIREMENTS:
-${JSON.stringify(job.parsed_data, null, 2)}
+  IMPORTANT: This job has FLEXIBLE requirements. Years of experience are PROXIES for depth, not hard cutoffs.
 
-CANDIDATE PROFILE:
-${JSON.stringify(parsedProfile, null, 2)}
+  JOB REQUIREMENTS:
+  ${JSON.stringify(job.parsed_data, null, 2)}
 
-SCORING MODEL (use these exact weights from the job):
-${JSON.stringify(job.parsed_data.weights, null, 2)}
+  CANDIDATE PROFILE:
+  ${JSON.stringify(parsedProfile, null, 2)}
 
-Score each category from 0-100:
+  SCORING MODEL (use these exact weights from the job):
+  ${JSON.stringify(job.parsed_data.weights, null, 2)}
 
-1. Core Match (weight: leadership=${job.parsed_data.weights?.leadership || 25})
-   - Similar role/title match
-   - Appropriate seniority level
-   - Management experience if required
-   - Primary domain alignment
+  UNDERSTANDING THE JOB REQUIREMENTS:
+  Each must_have item has:
+  - skill: the technology/skill name
+  - min_experience_years: a PROXY for expected depth (not a knockout threshold)
+  - flexibility_level: "high"=can substitute, "medium"=some flexibility, "low"=important
+  - context: WHAT THIS REALLY MEANS (e.g., "Lead-level Kotlin for architecture" vs "Kotlin for tooling")
+  - alternatives: similar skills that could substitute
 
-2. Tech Match - Primary Stack (weight: primary_stack=${job.parsed_data.weights?.primary_stack || 30})
-   - Match against must_have technologies WITH VERSION AWARENESS:
-     * Exact version match = full score
-     * Same major version = 90% score  
-     * Same technology, no version info = 75% score
-     * Older major version = 50% score
-     * Missing technology = 0% score
-   - Use tech_stack_detailed for precision
+  Score each category from 0-100:
 
-3. Tech Match - Secondary Stack (weight: secondary_stack=${job.parsed_data.weights?.secondary_stack || 20})
-   - Match against nice_to_have technologies (same version-aware logic)
-   - Bonus for additional relevant skills
+  1. Core Match (weight: leadership=${job.parsed_data.weights?.leadership || 25})
+    - Similar role/title match
+    - Appropriate seniority level
+    - Management experience if required
+    - Primary domain alignment
 
-4. Architecture/Depth (weight: architecture=${job.parsed_data.weights?.architecture || 15})
-   - System design, architecture experience
-   - Scale, distributed systems
-   - Hands-on evidence
+  2. Tech Match - Primary Stack (weight: primary_stack=${job.parsed_data.weights?.primary_stack || 30})
+    - Match against must_have technologies WITH FLEXIBILITY:
+      * Exact skill match = full score
+      * Similar skill from "alternatives" = 85% score
+      * Older version but relevant experience = 70% score
+      * Missing but strong in related area = 50% score (don't zero it out)
+    - Consider the flexibility_level: if "high", missing skill is OK if alternatives are present
+    - Consider experience_years as depth proxy: 9 years Kotlin when 10 is requested = probably OK
+    - CONTEXT MATTERS: if "Kotlin for architecture", then having 2 years Kotlin + 10 years architecture might be better than having Kotlin alone
 
-5. Cloud/DevOps (weight: cloud_devops=${job.parsed_data.weights?.cloud_devops || 10})
-   - Cloud platforms
-   - CI/CD, Kubernetes, Docker
-   - DevOps practices
+  3. Tech Match - Secondary Stack (weight: secondary_stack=${job.parsed_data.weights?.secondary_stack || 20})
+    - Match against nice_to_have technologies
+    - Bonus for additional relevant skills
 
-CRITICAL RULES:
-- must_have items that are MISSING should significantly reduce the score
-- nice_to_have items that are PRESENT should boost the score
-- "Team Lead" without formal title but with evidence of leadership still counts
-- Tech synonyms count (Java/Spring/APIs = Backend evidence)
-- Be strict but fair
-- overall_score = weighted average of all category scores
-- When scoring tech, note specific version matches/mismatches in strengths/gaps
-- breakdown: object with these EXACT number fields (each 0-100):
+  4. Architecture/Depth (weight: architecture=${job.parsed_data.weights?.architecture || 15})
+    - System design, architecture experience
+    - Scale, distributed systems
+    - Hands-on evidence
+    - Total years of experience as depth signal
+
+  5. Cloud/DevOps (weight: cloud_devops=${job.parsed_data.weights?.cloud_devops || 10})
+    - Cloud platforms
+    - CI/CD, Kubernetes, Docker
+    - DevOps practices
+
+  CRITICAL RULES:
+  - Years of experience mismatch by 1-2 years = NOT a deal breaker. Context matters.
+  - Missing technologies with HIGH flexibility = should not heavily penalize
+  - Missing technologies with LOW flexibility = should reduce score more, but still don't zero it
+  - Candidates can substitute skills (use "alternatives" field to check)
+  - Be strict on depth but flexible on exact tech match
+  - overall_score = weighted average of all category scores
+  - breakdown: object with these EXACT number fields (each 0-100):
   * core_match (leadership/role fit score)
   * primary_stack (must_have tech score)
   * secondary_stack (nice_to_have tech score)
   * depth_match (architecture/depth score)
   * cloud_devops (cloud/devops score)
 
-Also provide:
-- category_scores: object with named category scores (e.g. "Leadership": 90, "Mobile": 85, etc.) - use descriptive names relevant to this specific job
-- tech_comparison: array of objects comparing each must_have tech vs what the candidate has. Each item: { required, candidate_has, match_level ("exact"|"partial"|"missing"), note }
-- soft_skills_assessment: 2-3 sentence analysis of the candidate's soft skills relevance to this role, based on soft_skills array
-- strengths: array of 3-5 specific reasons this candidate is a good fit (mention specific versions when relevant)
-- gaps: array of specific missing requirements or concerns (mention version gaps when relevant)
-- recommendation: a 2-3 sentence assessment
-- recommendation_level: one of "strong_fit", "good_fit", "partial_fit", "weak_fit"`,
+  Also provide:
+  - category_scores: object with named category scores (e.g. "Leadership": 90, "Mobile": 85, etc.)
+  - tech_comparison: array of objects comparing each must_have tech vs what the candidate has. Each item: { required, candidate_has, match_level ("exact"|"partial"|"missing"), note }
+  - soft_skills_assessment: 2-3 sentence analysis
+  - strengths: array of 3-5 specific reasons this candidate is a good fit
+  - gaps: array of specific concerns or areas to explore
+  - recommendation: a 2-3 sentence assessment
+  - recommendation_level: one of "strong_fit", "good_fit", "partial_fit", "weak_fit"`,
     response_json_schema: {
       type: "object",
       properties: {
