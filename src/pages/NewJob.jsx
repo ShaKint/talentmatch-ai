@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { ArrowRight, Zap, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import JobCreationStep1 from '@/components/job/JobCreationStep1';
+import JobCreationStep2 from '@/components/job/JobCreationStep2';
+import JobCreationStep3 from '@/components/job/JobCreationStep3';
 
 export default function NewJob() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
@@ -23,7 +23,6 @@ export default function NewJob() {
         emphasis_notes: notes,
         status: 'parsing',
       });
-      // Trigger AI parsing
       await base44.functions.invoke('parseJobDescription', { jobId: job.id });
       return job;
     },
@@ -33,6 +32,15 @@ export default function NewJob() {
     },
   });
 
+  const goToStep = (nextStep) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setStep(nextStep);
+  };
+
+  const handleSubmit = () => {
+    createMutation.mutate();
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -40,68 +48,53 @@ export default function NewJob() {
           <ArrowRight className="w-4 h-4" />
           חזרה למשרות
         </button>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">משרה חדשה</h1>
-        <p className="text-muted-foreground mt-1">הזן תיאור משרה והמערכת תייצר שאילתות חיפוש אוטומטיות</p>
-      </div>
-
-      <div className="bg-card rounded-xl border border-border p-8 space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="title">שם המשרה</Label>
-          <Input
-            id="title"
-            placeholder='למשל: "Fullstack Team Leader"'
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="text-lg"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="desc">תיאור המשרה</Label>
-          <Textarea
-            id="desc"
-            placeholder="הדבק כאן את תיאור המשרה המלא..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[250px] font-mono text-sm"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="notes">דגשים נוספים (אופציונלי)</Label>
-          <Textarea
-            id="notes"
-            placeholder="למשל: חובה ניסיון ניהולי, עדיפות ל-mobile background, חשוב שיהיה hands-on..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="min-h-[100px]"
-          />
-        </div>
-
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Zap className="w-4 h-4 text-primary" />
-            <span>המערכת תנתח את התיאור ותייצר שאילתות חיפוש</span>
-          </div>
-          <Button
-            onClick={() => createMutation.mutate()}
-            disabled={!title || !description || createMutation.isPending}
-            className="gap-2 min-w-[160px]"
-          >
-            {createMutation.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                מנתח...
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                צור ונתח
-              </>
-            )}
-          </Button>
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">יצירת משרה חדשה</h1>
+        <div className="flex items-center gap-2 mt-3">
+          {[1, 2, 3].map(num => (
+            <React.Fragment key={num}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+                step === num ? 'bg-primary text-primary-foreground' :
+                step > num ? 'bg-primary/30 text-primary' :
+                'bg-secondary text-muted-foreground'
+              }`}>
+                {num}
+              </div>
+              {num < 3 && <div className={`flex-1 h-1 ${step > num ? 'bg-primary/30' : 'bg-secondary'} transition-all`} />}
+            </React.Fragment>
+          ))}
         </div>
       </div>
+
+      {step === 1 && (
+        <JobCreationStep1
+          title={title}
+          description={description}
+          onTitleChange={setTitle}
+          onDescriptionChange={setDescription}
+          onNext={() => goToStep(2)}
+        />
+      )}
+
+      {step === 2 && (
+        <JobCreationStep2
+          notes={notes}
+          onNotesChange={setNotes}
+          onBack={() => goToStep(1)}
+          onNext={() => goToStep(3)}
+          title={title}
+        />
+      )}
+
+      {step === 3 && (
+        <JobCreationStep3
+          title={title}
+          description={description}
+          notes={notes}
+          isLoading={createMutation.isPending}
+          onBack={() => goToStep(2)}
+          onSubmit={handleSubmit}
+        />
+      )}
     </div>
   );
 }
