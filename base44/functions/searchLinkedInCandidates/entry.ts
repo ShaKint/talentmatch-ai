@@ -21,7 +21,9 @@ Deno.serve(async (req) => {
   const data = await res.json();
 
   if (!res.ok) {
-    return Response.json({ error: data.error?.message || 'Google API error', details: data }, { status: 400 });
+    console.error('Google API Error:', { status: res.status, error: data.error });
+    const errorMsg = data.error?.message || 'Google API error';
+    return Response.json({ error: errorMsg }, { status: res.status });
   }
 
   const items = (data.items || []).map(item => ({

@@ -94,12 +94,21 @@ export default function AutoSourceCandidates({ job }) {
     setActiveQuery(query);
     setPage(startPage);
     const start = (startPage - 1) * 10 + 1;
-    const res = await base44.functions.invoke('searchLinkedInCandidates', { query: query.query, start });
-    setResults(res.data.items || []);
-    setTotal(res.data.total);
-    setLoading(false);
-    if ((res.data.items || []).length === 0) {
-      toast({ title: 'לא נמצאו תוצאות', description: 'נסה שאילתה אחרת' });
+    try {
+      const res = await base44.functions.invoke('searchLinkedInCandidates', { query: query.query, start });
+      setResults(res.data.items || []);
+      setTotal(res.data.total);
+      if ((res.data.items || []).length === 0) {
+        toast({ title: 'לא נמצאו תוצאות', description: 'נסה שאילתה אחרת' });
+      }
+    } catch (error) {
+      toast({
+        title: 'שגיאה בחיפוש',
+        description: error.response?.data?.error || error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
