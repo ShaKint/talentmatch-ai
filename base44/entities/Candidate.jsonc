@@ -4,7 +4,7 @@
   "properties": {
     "job_id": {
       "type": "string",
-      "description": "Associated job ID"
+      "description": "Associated job ID (optional - candidate can be in pool without specific job)"
     },
     "profile_url": {
       "type": "string",
@@ -198,7 +198,5 @@
       "default": "pending"
     }
   },
-  "required": [
-    "job_id"
-  ]
+  "required": []
 }
