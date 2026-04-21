@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Loader2, Wand2, Users } from 'lucide-react';
 import EditableParsedRequirements from '@/components/job/EditableParsedRequirements';
+import LinkedInConnectButton from '@/components/linkedin/LinkedInConnectButton';
 import SearchQueries from '@/components/job/SearchQueries';
 import AddCandidates from '@/components/job/AddCandidates';
 import MatchScoreCard from '@/components/candidate/MatchScoreCard';
@@ -98,10 +99,13 @@ export default function JobDetails() {
             </div>
           </div>
         </div>
-        <Button variant="outline" className="gap-2 shrink-0" onClick={handleReparse}>
-          <Wand2 className="w-4 h-4" />
-          נתח מחדש
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <LinkedInConnectButton />
+          <Button variant="outline" className="gap-2" onClick={handleReparse}>
+            <Wand2 className="w-4 h-4" />
+            נתח מחדש
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
