@@ -138,7 +138,7 @@ export default function JobDetails() {
         </div>
 
         {/* Right column */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <AddCandidates jobId={id} />
           <LatestAnalyzedCandidate candidates={candidates} />
           <AutoSourceCandidates job={job} />

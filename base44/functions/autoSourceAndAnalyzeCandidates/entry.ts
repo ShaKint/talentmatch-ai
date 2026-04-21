@@ -10,8 +10,8 @@ Deno.serve(async (req) => {
     if (!jobId) return Response.json({ error: 'jobId is required' }, { status: 400 });
 
     // Get job and queries
-    const job = await base44.entities.Job.get(jobId);
-    if (!job) return Response.json({ error: 'Job not found' }, { status: 404 });
+     const job = await base44.asServiceRole.entities.Job.get(jobId);
+     if (!job) return Response.json({ error: 'Job not found' }, { status: 404 });
 
     const xrayQueries = job.generated_queries?.google_xray || [];
     if (xrayQueries.length === 0) {
