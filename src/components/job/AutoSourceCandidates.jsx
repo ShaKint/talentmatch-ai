@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, Globe, ChevronRight, ChevronLeft, Linkedin, Zap } from 'lucide-react';
+import { Search, Loader2, Globe, ChevronRight, ChevronLeft, Linkedin, Zap, Wand2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 function ResultCard({ item }) {
@@ -46,9 +46,29 @@ export default function AutoSourceCandidates({ job }) {
    const [page, setPage] = useState(1);
    const [total, setTotal] = useState(null);
    const [autoLoading, setAutoLoading] = useState(false);
+   const [reparsing, setReparsing] = useState(false);
    const { toast } = useToast();
 
    const queries = job?.generated_queries?.google_xray || [];
+
+   const handleRegenerate = async () => {
+     setReparsing(true);
+     try {
+       await base44.functions.invoke('parseJobDescription', { jobId: job.id });
+       toast({
+         title: 'יצירת שאילתות בהצלחה',
+         description: 'השאילתות חדשות מוכנות'
+       });
+     } catch (error) {
+       toast({
+         title: 'שגיאה',
+         description: error.message,
+         variant: 'destructive'
+       });
+     } finally {
+       setReparsing(false);
+     }
+   };
 
    const handleAutoSource = async () => {
      setAutoLoading(true);
@@ -93,8 +113,20 @@ export default function AutoSourceCandidates({ job }) {
 
   if (!queries.length) {
     return (
-      <div className="bg-card rounded-xl border border-border p-5 text-center text-sm text-muted-foreground">
-        אין שאילתות X-Ray עדיין. נתח את המשרה כדי לייצר שאילתות.
+      <div className="bg-card rounded-xl border border-border p-5 space-y-3">
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">אין שאילתות X-Ray עדיין</p>
+          <Button
+            onClick={handleRegenerate}
+            disabled={reparsing}
+            variant="outline"
+            size="sm"
+            className="gap-2 w-full"
+          >
+            <Wand2 className="w-4 h-4" />
+            {reparsing ? 'ניתוח...' : 'יצור שאילתות'}
+          </Button>
+        </div>
       </div>
     );
   }
