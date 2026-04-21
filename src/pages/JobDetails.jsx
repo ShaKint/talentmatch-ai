@@ -11,6 +11,7 @@ import SearchQueries from '@/components/job/SearchQueries';
 import AddCandidates from '@/components/job/AddCandidates';
 import MatchScoreCard from '@/components/candidate/MatchScoreCard';
 import LatestAnalyzedCandidate from '@/components/candidate/LatestAnalyzedCandidate';
+import AutoSourceCandidates from '@/components/job/AutoSourceCandidates';
 
 const statusConfig = {
   draft: { label: 'טיוטה', className: 'bg-secondary text-secondary-foreground' },
@@ -140,6 +141,7 @@ export default function JobDetails() {
         <div className="space-y-6">
           <AddCandidates jobId={id} />
           <LatestAnalyzedCandidate candidates={candidates} />
+          <AutoSourceCandidates job={job} />
         </div>
       </div>
     </div>
