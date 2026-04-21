@@ -107,7 +107,7 @@ export default function AutoSourceCandidates({ job }) {
            <h3 className="font-semibold text-foreground">חיפוש אוטומטי - Google X-Ray</h3>
          </div>
          <Button
-           variant="accent"
+           variant="default"
            size="sm"
            onClick={handleAutoSource}
            disabled={autoLoading}
