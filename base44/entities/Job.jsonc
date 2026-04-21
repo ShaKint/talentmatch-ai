@@ -27,13 +27,74 @@
         "must_have": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "skill": {
+                "type": "string",
+                "description": "The skill, technology, or requirement name"
+              },
+              "min_experience_years": {
+                "type": "number",
+                "description": "Minimum years of experience (proxy for depth)"
+              },
+              "max_experience_years": {
+                "type": "number",
+                "description": "Maximum years expected (if there's a ceiling)"
+              },
+              "flexibility_level": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ],
+                "description": "How flexible is this requirement? high=can substitute with similar, medium=some flexibility, low=hard requirement"
+              },
+              "context": {
+                "type": "string",
+                "description": "What does this skill truly mean to the recruiter? What level/role/type of experience?"
+              },
+              "alternatives": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Similar skills that could substitute"
+              }
+            },
+            "required": [
+              "skill"
+            ]
           }
         },
         "nice_to_have": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "skill": {
+                "type": "string",
+                "description": "The skill, technology, or requirement name"
+              },
+              "min_experience_years": {
+                "type": "number",
+                "description": "Minimum years of experience"
+              },
+              "context": {
+                "type": "string",
+                "description": "Why this is nice to have"
+              },
+              "alternatives": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Similar skills that could substitute"
+              }
+            },
+            "required": [
+              "skill"
+            ]
           }
         },
         "domain": {
