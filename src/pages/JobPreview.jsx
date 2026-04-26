@@ -1,29 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 export default function JobPreview() {
   const { id } = useParams();
   const containerRef = useRef(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     async function load() {
-      // Fetch job data
-      const job = await base44.entities.Job.get(id);
-      if (!job || !isMounted) return;
+      // Fetch job via public backend function (no user auth needed)
+      const res = await base44.functions.invoke('getPublicJob', { jobId: id });
+      const job = res.data;
+
+      if (!job || !isMounted) { setError(true); return; }
 
       const template = job.design_template || 'tech';
       const templateFile = template === 'bit' ? '/templates/bit.html' : '/templates/tech.html';
 
-      // Fetch the HTML template
-      const res = await fetch(templateFile);
-      const html = await res.text();
+      const templateRes = await fetch(templateFile);
+      if (!templateRes.ok) { setError(true); return; }
+      const html = await templateRes.text();
 
       if (!isMounted || !containerRef.current) return;
 
-      // Build job data payload
       const jobPayload = {
         job: {
           id: job.id,
@@ -53,25 +55,15 @@ export default function JobPreview() {
         },
       };
 
-      // Inject job data into the template via a script override
       const injectedHtml = html.replace(
-        'loadJob().catch(showError);',
-        `
-        window.__JOB_PAYLOAD__ = ${JSON.stringify(jobPayload)};
-        async function loadJob() {
-          renderJob(window.__JOB_PAYLOAD__);
-        }
-        loadJob().catch(showError);
-        `
+        /loadJob\(\)\.catch\(showError\);/,
+        `window.__JOB_PAYLOAD__ = ${JSON.stringify(jobPayload)};
+        async function loadJob() { renderJob(window.__JOB_PAYLOAD__); }
+        loadJob().catch(showError);`
       );
 
-      // Create an iframe and inject the content
       const iframe = document.createElement('iframe');
-      iframe.style.width = '100%';
-      iframe.style.height = '100vh';
-      iframe.style.border = 'none';
-      iframe.style.display = 'block';
-
+      iframe.style.cssText = 'width:100%;height:100vh;border:none;display:block;';
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(iframe);
 
@@ -81,14 +73,23 @@ export default function JobPreview() {
       doc.close();
     }
 
-    load();
+    load().catch(() => setError(true));
     return () => { isMounted = false; };
   }, [id]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4 bg-gray-900 text-white">
+        <span className="text-4xl">🔍</span>
+        <p>המשרה לא נמצאה או הוסרה</p>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} style={{ minHeight: '100vh' }}>
       <div className="flex items-center justify-center h-screen">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-gray-700 border-t-white rounded-full animate-spin" />
       </div>
     </div>
   );

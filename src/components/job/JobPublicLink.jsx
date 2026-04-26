@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { ExternalLink, Copy, Check, Palette } from 'lucide-react';
+import { ExternalLink, Copy, Check, Palette, Share2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
-const templateLabels = {
-  tech: 'Tech Dark',
-  bit: 'Bit Light',
-};
+const templateLabels = { tech: 'Tech Dark', bit: 'Bit Light' };
 
 export default function JobPublicLink({ job, jobId }) {
   const [copied, setCopied] = useState(false);
   const [changingTemplate, setChangingTemplate] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Build the public preview URL — served by the serveJobPage function via the preview page
   const publicUrl = `${window.location.origin}/job-preview/${jobId}`;
 
   const handleCopy = () => {
@@ -24,10 +22,19 @@ export default function JobPublicLink({ job, jobId }) {
     toast({ title: 'הקישור הועתק!' });
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: job.title, url: publicUrl });
+    } else {
+      handleCopy();
+    }
+  };
+
   const handleToggleTemplate = async () => {
-    const next = job.design_template === 'bit' ? 'tech' : 'bit';
+    const next = (job.design_template || 'tech') === 'bit' ? 'tech' : 'bit';
     setChangingTemplate(true);
     await base44.entities.Job.update(jobId, { design_template: next });
+    queryClient.invalidateQueries({ queryKey: ['job', jobId] });
     setChangingTemplate(false);
     toast({ title: `עיצוב שונה ל-${templateLabels[next]}` });
   };
@@ -41,7 +48,7 @@ export default function JobPublicLink({ job, jobId }) {
         </h3>
       </div>
       <div className="p-5 space-y-3">
-        {/* Template badge */}
+        {/* Template */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Palette className="w-4 h-4" />
@@ -56,29 +63,24 @@ export default function JobPublicLink({ job, jobId }) {
           </button>
         </div>
 
-        {/* URL display */}
-        <div className="flex items-center gap-2 bg-secondary/50 rounded-lg p-3 text-xs font-mono text-muted-foreground truncate">
-          <span className="truncate flex-1">{publicUrl}</span>
+        {/* URL */}
+        <div className="bg-secondary/50 rounded-lg p-3 text-xs font-mono text-muted-foreground truncate">
+          {publicUrl}
         </div>
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 flex-1"
-            onClick={handleCopy}
-          >
+          <Button variant="outline" size="sm" className="gap-1.5 flex-1" onClick={handleCopy}>
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'הועתק!' : 'העתק קישור'}
+            {copied ? 'הועתק!' : 'העתק'}
           </Button>
-          <Button
-            size="sm"
-            className="gap-1.5 flex-1"
-            onClick={() => window.open(publicUrl, '_blank')}
-          >
+          <Button variant="outline" size="sm" className="gap-1.5 flex-1" onClick={handleShare}>
+            <Share2 className="w-3.5 h-3.5" />
+            שתף
+          </Button>
+          <Button size="sm" className="gap-1.5 flex-1" onClick={() => window.open(publicUrl, '_blank')}>
             <ExternalLink className="w-3.5 h-3.5" />
-            פתח דף
+            פתח
           </Button>
         </div>
       </div>

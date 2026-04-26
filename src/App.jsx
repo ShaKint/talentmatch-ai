@@ -37,6 +37,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/job-preview/:id" element={<JobPreview />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -44,7 +45,6 @@ const AuthenticatedApp = () => {
         <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/candidates" element={<Candidates />} />
         <Route path="/sourcing" element={<Sourcing />} />
-        <Route path="/job-preview/:id" element={<JobPreview />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
