@@ -4,13 +4,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Loader2, Upload, Link2 } from 'lucide-react';
+import { UserPlus, Loader2, Upload, Link2, FileText, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function AddCandidates({ jobId }) {
   const [urls, setUrls] = useState('');
   const [profileText, setProfileText] = useState('');
+  const [cvFile, setCvFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -61,6 +63,30 @@ export default function AddCandidates({ jobId }) {
     addMutation.mutate([{ text: profileText }]);
   };
 
+  const handleAddByCv = async () => {
+    if (!cvFile) return;
+    const formData = new FormData();
+    formData.append('file', cvFile);
+    // Upload file first, then extract text via integration
+    const { file_url } = await base44.integrations.Core.UploadFile({ file: cvFile });
+    const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
+      file_url,
+      json_schema: {
+        type: 'object',
+        properties: {
+          full_text: { type: 'string', description: 'All text content from the CV/resume as a single string' }
+        }
+      }
+    });
+    const rawText = extracted?.output?.full_text || '';
+    if (!rawText) {
+      toast({ title: 'לא הצלחנו לחלץ טקסט מהקובץ', variant: 'destructive' });
+      return;
+    }
+    addMutation.mutate([{ text: rawText }]);
+    setCvFile(null);
+  };
+
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-5 border-b border-border">
@@ -70,17 +96,76 @@ export default function AddCandidates({ jobId }) {
         </h3>
       </div>
       <div className="p-5">
-        <Tabs defaultValue="urls" dir="rtl">
-          <TabsList className="bg-secondary mb-4">
-            <TabsTrigger value="urls" className="gap-1.5">
+        <Tabs defaultValue="cv" dir="rtl">
+          <TabsList className="bg-secondary mb-4 w-full">
+            <TabsTrigger value="cv" className="gap-1.5 flex-1">
+              <FileText className="w-3.5 h-3.5" />
+              קו"ח
+            </TabsTrigger>
+            <TabsTrigger value="urls" className="gap-1.5 flex-1">
               <Link2 className="w-3.5 h-3.5" />
               לינקים
             </TabsTrigger>
-            <TabsTrigger value="text" className="gap-1.5">
+            <TabsTrigger value="text" className="gap-1.5 flex-1">
               <Upload className="w-3.5 h-3.5" />
-              טקסט חופשי
+              טקסט
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="cv" className="space-y-4">
+            <div
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault(); setIsDragging(false);
+                const f = e.dataTransfer.files[0];
+                if (f) setCvFile(f);
+              }}
+              onClick={() => document.getElementById('cv-file-input').click()}
+            >
+              <input
+                id="cv-file-input"
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                className="hidden"
+                onChange={(e) => e.target.files[0] && setCvFile(e.target.files[0])}
+              />
+              {cvFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{cvFile.name}</span>
+                  <button
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={(e) => { e.stopPropagation(); setCvFile(null); }}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground">גרור קובץ קו"ח לכאן</p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF, DOC, DOCX, TXT</p>
+                </>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              הקובץ יחלץ אוטומטית, ינותח ויקבל ציון התאמה מול דרישות המשרה
+            </p>
+            <Button
+              onClick={handleAddByCv}
+              disabled={!cvFile || addMutation.isPending}
+              className="gap-2 w-full"
+            >
+              {addMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FileText className="w-4 h-4" />
+              )}
+              {addMutation.isPending ? 'מחלץ ומנתח...' : 'נתח קו"ח'}
+            </Button>
+          </TabsContent>
 
           <TabsContent value="urls" className="space-y-4">
             <div className="space-y-2">
