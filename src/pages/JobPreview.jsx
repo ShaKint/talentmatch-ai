@@ -55,12 +55,31 @@ export default function JobPreview() {
         },
       };
 
-      const injectedHtml = html.replace(
-        /loadJob\(\)\.catch\(showError\);/,
-        `window.__JOB_PAYLOAD__ = ${JSON.stringify(jobPayload)};
-        async function loadJob() { renderJob(window.__JOB_PAYLOAD__); }
-        loadJob().catch(showError);`
-      );
+      // Fix modal file upload button overflow
+      const cssfix = `<style>
+        .modal, .modal-box, .modal-inner, [class*="modal"] {
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+        }
+        .drop-zone, .file-drop, [class*="drop"], [class*="upload"] {
+          max-width: 100% !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+        }
+        .modal-body, .modal-content, .form-body {
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+        }
+      </style>`;
+
+      const injectedHtml = html
+        .replace('</head>', cssfix + '</head>')
+        .replace(
+          /loadJob\(\)\.catch\(showError\);/,
+          `window.__JOB_PAYLOAD__ = ${JSON.stringify(jobPayload)};
+          async function loadJob() { renderJob(window.__JOB_PAYLOAD__); }
+          loadJob().catch(showError);`
+        );
 
       const iframe = document.createElement('iframe');
       iframe.style.cssText = 'width:100%;height:100vh;border:none;display:block;';
