@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>משרה | JobCards Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #e63946;
+      --red-dim: #c1121f;
+      --bg: #0d0d0d;
+      --bg2: #141414;
+      --bg3: #1a1a1a;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --chip-bg: #2a0a0a;
+      --chip-border: #e6394640;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    /* ── Loading ── */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999;
+      font-size: 1.2rem;
+      color: var(--muted);
+      gap: 10px;
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    #error-screen {
+      display: none;
+      position: fixed; inset: 0;
+      background: var(--bg);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    #error-screen span { font-size: 2.5rem; }
+
+    /* ── Main ── */
+    #main { display: none; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a0000 0%, #0d0d0d 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px 40px;
+    }
+    .hero-inner {
+      max-width: 860px; margin: 0 auto;
+    }
+    .company-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .company-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      object-fit: contain; background: var(--card);
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .company-name {
+      font-size: 0.85rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .role-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .role-title em {
+      color: var(--red); font-style: normal;
+    }
+    .meta-pills {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 28px;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+
+    /* ── Apply button in hero ── */
+    .hero-cta {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 12px 32px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .hero-cta:hover { background: var(--red-dim); }
+
+    /* ── Layout ── */
+    .layout {
+      max-width: 860px; margin: 0 auto;
+      padding: 32px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 32px;
+    }
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+    }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 36px; }
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--red);
+      margin-bottom: 12px;
+    }
+    .section-body {
+      font-size: 0.95rem; line-height: 1.75;
+      color: #ccc;
+    }
+    .section-body p { margin-bottom: 10px; }
+    .section-body ul {
+      padding-right: 20px;
+      list-style: none;
+    }
+    .section-body ul li {
+      padding: 5px 0;
+      padding-right: 18px;
+      position: relative;
+    }
+    .section-body ul li::before {
+      content: '';
+      position: absolute; right: 0; top: 14px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+
+    /* ── Chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      color: var(--red);
+      font-size: 0.78rem; font-weight: 500;
+      padding: 4px 12px; border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { position: relative; }
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      position: sticky; top: 24px;
+    }
+    .sidebar-card h3 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 0.78rem; color: var(--muted);
+      margin-bottom: 6px; font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--red); }
+    .form-group input::placeholder { color: var(--muted); }
+
+    .file-upload {
+      display: flex; flex-direction: column; align-items: center;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      text-align: center;
+    }
+    .file-upload:hover { border-color: var(--red); }
+    .file-upload input { display: none; }
+    .file-upload-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .file-upload-text { font-size: 0.8rem; color: var(--muted); }
+    .file-upload-name { font-size: 0.82rem; color: var(--red); margin-top: 6px; display: none; }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Rubik', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .submit-btn:hover { background: var(--red-dim); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Update banner ── */
+    #update-banner {
+      display: none;
+      background: #1a1000;
+      border: 1px solid #f59e0b60;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: #f59e0b;
+    }
+    #update-banner button {
+      background: #f59e0b;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Rubik', sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: #16a34a;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      box-shadow: 0 8px 32px #00000060;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <span>טוען...</span>
+</div>
+
+<!-- Error -->
+<div id="error-screen">
+  <span>🔍</span>
+  <p>המשרה לא נמצאה או הוסרה</p>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="company-row">
+        <img id="company-logo" class="company-logo" src="" alt="" />
+        <span id="role-sub-company" class="company-name"></span>
+      </div>
+      <h1 class="role-title" id="role-title">...</h1>
+      <div class="meta-pills">
+        <span class="pill"><span class="pill-dot"></span><span id="role-loc">-</span></span>
+        <span class="pill"><span class="pill-dot"></span><span id="role-mode">Hybrid</span></span>
+      </div>
+      <a href="#apply-form" class="hero-cta">שלח/י קו"ח</a>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+    <!-- Content -->
+    <div class="content">
+
+      <div class="section" id="sec-who">
+        <div class="section-label">מי אנחנו</div>
+        <div class="section-body"></div>
+      </div>
+
+      <div class="section" id="sec-essence">
+        <div class="section-label">מהות התפקיד</div>
+        <div class="section-body"></div>
+      </div>
+
+      <div class="section" id="sec-resp">
+        <div class="section-label">אחריות ותחומי עיסוק</div>
+        <div class="section-body"><ul></ul></div>
+      </div>
+
+      <div class="section" id="sec-must">
+        <div class="section-label">חובה</div>
+        <div class="section-body"><ul></ul></div>
+      </div>
+
+      <div class="section" id="sec-nice">
+        <div class="section-label">יתרון</div>
+        <div class="section-body"><ul></ul></div>
+      </div>
+
+      <div class="section" id="sec-skills">
+        <div class="section-label">טכנולוגיות</div>
+        <div id="skill-chips" class="chips"></div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-card" id="apply-form">
+        <h3>שלח/י קו"ח</h3>
+
+        <div id="update-banner">
+          כבר הגשת מועמדות למשרה זו.<br/>
+          רוצה לעדכן קו"ח?
+          <br/>
+          <button id="update-yes-btn">כן, עדכן קו"ח</button>
+        </div>
+
+        <form id="apply-form-el" novalidate>
+          <div class="form-group">
+            <label for="full_name">שם מלא *</label>
+            <input type="text" id="full_name" name="full_name" placeholder="ישראל ישראלי" required />
+          </div>
+          <div class="form-group">
+            <label for="email">אימייל *</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="phone">טלפון</label>
+            <input type="tel" id="phone" name="phone" placeholder="050-0000000" />
+          </div>
+          <div class="form-group">
+            <label>קו"ח (PDF/Word) *</label>
+            <label class="file-upload" for="cv-input">
+              <span class="file-upload-icon">📎</span>
+              <span class="file-upload-text">לחץ לבחירת קובץ</span>
+              <span class="file-upload-name" id="cv-file-name"></span>
+              <input type="file" id="cv-input" name="cv" accept=".pdf,.doc,.docx" required />
+            </label>
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">שלח מועמדות</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  // ── State ──
+  let jobData = null;
+  let existingCandidateId = null;
+  let updateMode = false;
+
+  // ── Helpers ──
+  function getJobId() {
+    return window.location.pathname.split('/').pop();
+  }
+
+  function getPreviewParam() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('preview');
+  }
+
+  function show(el) { el.style.display = 'flex'; }
+  function hide(el) { el.style.display = 'none'; }
+
+  function showToast(msg, color = '#16a34a') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  function setSection(sectionId, html) {
+    const sec = document.getElementById(sectionId);
+    if (!sec) return;
+    sec.querySelector('.section-body').innerHTML = html;
+  }
+
+  function linesToList(text) {
+    if (!text) return '<ul></ul>';
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    return '<ul>' + lines.map(l => `<li>${l}</li>`).join('') + '</ul>';
+  }
+
+  // ── Load job ──
+  async function loadJob() {
+    const id = getJobId();
+    if (!id) { showError(); return; }
+
+    const preview = getPreviewParam();
+    const url = preview !== null
+      ? `/api/job/${id}?preview=${preview}`
+      : `/api/job/${id}`;
+
+    const res = await fetch(url);
+    if (!res.ok) { showError(); return; }
+
+    const data = await res.json();
+    jobData = data;
+    renderJob(data);
+  }
+
+  function showError() {
+    hide(document.getElementById('loading-screen'));
+    const err = document.getElementById('error-screen');
+    err.style.display = 'flex';
+  }
+
+  function renderJob(data) {
+    const { job, requirements = [], company } = data;
+
+    // Title & meta
+    document.title = `${job.title} | JobCards Pro`;
+    document.getElementById('role-title').textContent = job.title;
+    document.getElementById('role-loc').textContent = job.location || '-';
+
+    // Company
+    if (company) {
+      document.getElementById('role-sub-company').textContent = company.name || '';
+      if (company.logo_url) {
+        const logo = document.getElementById('company-logo');
+        logo.src = company.logo_url;
+        logo.style.display = 'block';
+      }
+    }
+
+    // Sections
+    if (job.about_he) {
+      setSection('sec-who', `<p>${job.about_he}</p>`);
+    }
+    if (job.essence_he) {
+      setSection('sec-essence', `<p>${job.essence_he}</p>`);
+    }
+    if (job.responsibilities_he) {
+      setSection('sec-resp', linesToList(job.responsibilities_he));
+    }
+
+    // Requirements by priority
+    const must = requirements.filter(r => r.priority === 'must');
+    const nice = requirements.filter(r => r.priority === 'should' || r.priority === 'could');
+    const skills = requirements.filter(r => r.category === 'skills_tech');
+
+    if (must.length) {
+      document.getElementById('sec-must').querySelector('ul').innerHTML =
+        must.map(r => `<li>${r.requirement}</li>`).join('');
+    } else {
+      document.getElementById('sec-must').style.display = 'none';
+    }
+
+    if (nice.length) {
+      document.getElementById('sec-nice').querySelector('ul').innerHTML =
+        nice.map(r => `<li>${r.requirement}</li>`).join('');
+    } else {
+      document.getElementById('sec-nice').style.display = 'none';
+    }
+
+    // Skill chips
+    const chipsEl = document.getElementById('skill-chips');
+    if (skills.length) {
+      chipsEl.innerHTML = skills.map(r => `<span class="chip">${r.requirement}</span>`).join('');
+    } else {
+      document.getElementById('sec-skills').style.display = 'none';
+    }
+
+    // Show main
+    hide(document.getElementById('loading-screen'));
+    const main = document.getElementById('main');
+    main.style.display = 'block';
+  }
+
+  // ── File input label ──
+  document.getElementById('cv-input').addEventListener('change', function () {
+    const nameEl = document.getElementById('cv-file-name');
+    if (this.files[0]) {
+      nameEl.textContent = this.files[0].name;
+      nameEl.style.display = 'block';
+    }
+  });
+
+  // ── Submit ──
+  document.getElementById('apply-form-el').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (updateMode) return; // handled by update button
+    await submitApplication(false);
+  });
+
+  document.getElementById('update-yes-btn').addEventListener('click', async function () {
+    await submitApplication(true);
+  });
+
+  async function submitApplication(isUpdate) {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'שולח...';
+
+    const full_name = document.getElementById('full_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const cvFile = document.getElementById('cv-input').files[0];
+
+    if (!full_name || !email || !cvFile) {
+      showToast('נא למלא שם, אימייל וקו"ח', '#dc2626');
+      btn.disabled = false;
+      btn.textContent = 'שלח מועמדות';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('full_name', full_name);
+    formData.append('email', email);
+    if (phone) formData.append('phone', phone);
+    formData.append('job_id', getJobId());
+    formData.append('company_id', jobData?.job?.company_id || '');
+    formData.append('job_title', jobData?.job?.title || '');
+    formData.append('cv', cvFile);
+
+    let url = '/api/apply';
+    let method = 'POST';
+
+    if (isUpdate && existingCandidateId) {
+      url = `/api/apply/${existingCandidateId}`;
+      method = 'PUT';
+    }
+
+    const res = await fetch(url, { method, body: formData });
+    const result = await res.json();
+
+    if (!res.ok) {
+      // Check if already applied
+      if (result.exists && result.candidate_id) {
+        existingCandidateId = result.candidate_id;
+        updateMode = true;
+        document.getElementById('update-banner').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'שלח מועמדות';
+        return;
+      }
+      showToast('שגיאה בשליחה, נסה שוב', '#dc2626');
+      btn.disabled = false;
+      btn.textContent = 'שלח מועמדות';
+      return;
+    }
+
+    // Also handle exists on 200 response
+    if (result.exists && result.candidate_id && !isUpdate) {
+      existingCandidateId = result.candidate_id;
+      updateMode = true;
+      document.getElementById('update-banner').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'שלח מועמדות';
+      return;
+    }
+
+    showToast('תודה! נחזור אליך בקרוב 🎉');
+    document.getElementById('apply-form-el').reset();
+    document.getElementById('cv-file-name').style.display = 'none';
+    document.getElementById('update-banner').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'שלח מועמדות';
+    updateMode = false;
+  }
+
+  // ── Init ──
+  loadJob().catch(showError);
+</script>
+</body>
+</html>
