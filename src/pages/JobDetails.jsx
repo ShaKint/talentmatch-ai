@@ -11,6 +11,7 @@ import SearchQueries from '@/components/job/SearchQueries';
 import AddCandidates from '@/components/job/AddCandidates';
 import MatchScoreCard from '@/components/candidate/MatchScoreCard';
 import LatestAnalyzedCandidate from '@/components/candidate/LatestAnalyzedCandidate';
+import JobPublicLink from '@/components/job/JobPublicLink';
 
 
 const statusConfig = {
@@ -139,6 +140,7 @@ export default function JobDetails() {
 
         {/* Right column */}
         <div className="space-y-6 min-w-0">
+          <JobPublicLink job={job} jobId={id} />
           <AddCandidates jobId={id} />
           <LatestAnalyzedCandidate candidates={candidates} />
 

@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import JobCreationStep1 from '@/components/job/JobCreationStep1';
 import JobCreationStep2 from '@/components/job/JobCreationStep2';
 import JobCreationStep3 from '@/components/job/JobCreationStep3';
+import TemplateSelector from '@/components/job/TemplateSelector';
 
 export default function NewJob() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function NewJob() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
+  const [template, setTemplate] = useState('tech');
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -21,6 +23,7 @@ export default function NewJob() {
         title,
         raw_description: description,
         emphasis_notes: notes,
+        design_template: template,
         status: 'parsing',
       });
       await base44.functions.invoke('parseJobDescription', { jobId: job.id });
@@ -41,6 +44,8 @@ export default function NewJob() {
     createMutation.mutate();
   };
 
+  const totalSteps = 4;
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -50,7 +55,7 @@ export default function NewJob() {
         </button>
         <h1 className="text-3xl font-bold text-foreground tracking-tight">יצירת משרה חדשה</h1>
         <div className="flex items-center gap-2 mt-3">
-          {[1, 2, 3].map(num => (
+          {[1, 2, 3, 4].map(num => (
             <React.Fragment key={num}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                 step === num ? 'bg-primary text-primary-foreground' :
@@ -59,7 +64,7 @@ export default function NewJob() {
               }`}>
                 {num}
               </div>
-              {num < 3 && <div className={`flex-1 h-1 ${step > num ? 'bg-primary/30' : 'bg-secondary'} transition-all`} />}
+              {num < totalSteps && <div className={`flex-1 h-1 ${step > num ? 'bg-primary/30' : 'bg-secondary'} transition-all`} />}
             </React.Fragment>
           ))}
         </div>
@@ -76,22 +81,40 @@ export default function NewJob() {
       )}
 
       {step === 2 && (
+        <div className="space-y-6">
+          <TemplateSelector value={template} onChange={setTemplate} />
+          <div className="flex justify-between pt-4 border-t border-border">
+            <button onClick={() => goToStep(1)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm transition-colors">
+              <ArrowRight className="w-4 h-4" />
+              חזור לשלב 1
+            </button>
+            <button
+              onClick={() => goToStep(3)}
+              className="bg-primary text-primary-foreground px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              המשך לשלב 3
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
         <JobCreationStep2
           notes={notes}
           onNotesChange={setNotes}
-          onBack={() => goToStep(1)}
-          onNext={() => goToStep(3)}
+          onBack={() => goToStep(2)}
+          onNext={() => goToStep(4)}
           title={title}
         />
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <JobCreationStep3
           title={title}
           description={description}
           notes={notes}
           isLoading={createMutation.isPending}
-          onBack={() => goToStep(2)}
+          onBack={() => goToStep(3)}
           onSubmit={handleSubmit}
         />
       )}

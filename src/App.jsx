@@ -13,6 +13,7 @@ import NewJob from '@/pages/NewJob';
 import JobDetails from '@/pages/JobDetails';
 import Candidates from '@/pages/Candidates';
 import Sourcing from '@/pages/Sourcing';
+import JobPreview from '@/pages/JobPreview';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -43,6 +44,7 @@ const AuthenticatedApp = () => {
         <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/candidates" element={<Candidates />} />
         <Route path="/sourcing" element={<Sourcing />} />
+        <Route path="/job-preview/:id" element={<JobPreview />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

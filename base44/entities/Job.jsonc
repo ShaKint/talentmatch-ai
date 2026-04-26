@@ -14,6 +14,15 @@
       "type": "string",
       "description": "Additional emphasis/notes from recruiter"
     },
+    "design_template": {
+      "type": "string",
+      "enum": [
+        "bit",
+        "tech"
+      ],
+      "default": "tech",
+      "description": "Visual design template for the public job page"
+    },
     "parsed_data": {
       "type": "object",
       "description": "Structured parsed job data from AI",
@@ -30,16 +39,13 @@
             "type": "object",
             "properties": {
               "skill": {
-                "type": "string",
-                "description": "The skill, technology, or requirement name"
+                "type": "string"
               },
               "min_experience_years": {
-                "type": "number",
-                "description": "Minimum years of experience (proxy for depth)"
+                "type": "number"
               },
               "max_experience_years": {
-                "type": "number",
-                "description": "Maximum years expected (if there's a ceiling)"
+                "type": "number"
               },
               "flexibility_level": {
                 "type": "string",
@@ -47,19 +53,16 @@
                   "high",
                   "medium",
                   "low"
-                ],
-                "description": "How flexible is this requirement? high=can substitute with similar, medium=some flexibility, low=hard requirement"
+                ]
               },
               "context": {
-                "type": "string",
-                "description": "What does this skill truly mean to the recruiter? What level/role/type of experience?"
+                "type": "string"
               },
               "alternatives": {
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "Similar skills that could substitute"
+                }
               }
             },
             "required": [
@@ -73,23 +76,19 @@
             "type": "object",
             "properties": {
               "skill": {
-                "type": "string",
-                "description": "The skill, technology, or requirement name"
+                "type": "string"
               },
               "min_experience_years": {
-                "type": "number",
-                "description": "Minimum years of experience"
+                "type": "number"
               },
               "context": {
-                "type": "string",
-                "description": "Why this is nice to have"
+                "type": "string"
               },
               "alternatives": {
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "Similar skills that could substitute"
+                }
               }
             },
             "required": [
@@ -113,8 +112,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "description": "Specific keyword combos for sourcing"
+          }
         },
         "weights": {
           "type": "object",
@@ -140,7 +138,6 @@
     },
     "generated_queries": {
       "type": "object",
-      "description": "Generated search queries",
       "properties": {
         "linkedin_boolean": {
           "type": "array",
