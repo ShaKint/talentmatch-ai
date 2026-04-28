@@ -65,20 +65,18 @@ export default function AddCandidates({ jobId }) {
 
   const handleAddByCv = async () => {
     if (!cvFile) return;
-    const formData = new FormData();
-    formData.append('file', cvFile);
-    // Upload file first, then extract text via integration
     const { file_url } = await base44.integrations.Core.UploadFile({ file: cvFile });
-    const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
-      file_url,
-      json_schema: {
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: 'Extract all text content from this CV/resume file. Return the full text as-is, preserving names, skills, experience, education and all details.',
+      file_urls: [file_url],
+      response_json_schema: {
         type: 'object',
         properties: {
-          full_text: { type: 'string', description: 'All text content from the CV/resume as a single string' }
+          full_text: { type: 'string', description: 'All text content from the CV/resume' }
         }
       }
     });
-    const rawText = extracted?.output?.full_text || '';
+    const rawText = result?.full_text || '';
     if (!rawText) {
       toast({ title: 'לא הצלחנו לחלץ טקסט מהקובץ', variant: 'destructive' });
       return;

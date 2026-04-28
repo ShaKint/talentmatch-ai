@@ -26,16 +26,17 @@ export default function CvUploadModal({ jobId, jobTitle, onClose, theme = 'dark'
     setStep('uploading');
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: 'Extract all text content from this CV/resume file. Return the full text as-is, preserving names, skills, experience, education and all details.',
+        file_urls: [file_url],
+        response_json_schema: {
           type: 'object',
           properties: {
-            full_text: { type: 'string', description: 'All text content from the CV/resume as a single string' }
+            full_text: { type: 'string', description: 'All text content from the CV/resume' }
           }
         }
       });
-      const rawText = extracted?.output?.full_text || '';
+      const rawText = result?.full_text || '';
       if (!rawText) throw new Error('לא הצלחנו לחלץ טקסט מהקובץ');
 
       const created = await base44.entities.Candidate.create({
