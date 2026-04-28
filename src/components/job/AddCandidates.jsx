@@ -69,6 +69,7 @@ export default function AddCandidates({ jobId }) {
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: 'Extract all text content from this CV/resume file. Return the full text as-is, preserving names, skills, experience, education and all details.',
       file_urls: [file_url],
+      model: 'gpt_5_mini',
       response_json_schema: {
         type: 'object',
         properties: {
