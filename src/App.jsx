@@ -14,6 +14,7 @@ import JobDetails from '@/pages/JobDetails';
 import Candidates from '@/pages/Candidates';
 import Sourcing from '@/pages/Sourcing';
 import JobPreview from '@/pages/JobPreview';
+import ContentManagement from '@/pages/ContentManagement';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
         <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/candidates" element={<Candidates />} />
         <Route path="/sourcing" element={<Sourcing />} />
+        <Route path="/content-management" element={<ContentManagement />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

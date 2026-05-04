@@ -1,0 +1,69 @@
+{
+  "name": "RagDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "\u05e9\u05dd/\u05db\u05d5\u05ea\u05e8\u05ea \u05d4\u05de\u05e1\u05de\u05da"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "organization",
+        "job"
+      ],
+      "default": "organization",
+      "description": "\u05e8\u05de\u05ea \u05d4\u05ea\u05d5\u05db\u05df: \u05db\u05dc\u05dc-\u05d0\u05e8\u05d2\u05d5\u05e0\u05d9 \u05d0\u05d5 \u05e1\u05e4\u05e6\u05d9\u05e4\u05d9 \u05dc\u05de\u05e9\u05e8\u05d4"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05de\u05e9\u05e8\u05d4 (\u05e8\u05e7 \u05d0\u05dd scope=job)"
+    },
+    "category": {
+      "type": "string",
+      "description": "\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 (\u05e2\u05d1\u05d5\u05e8 \u05ea\u05d5\u05db\u05df \u05d0\u05e8\u05d2\u05d5\u05e0\u05d9)"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "pdf",
+        "doc",
+        "presentation",
+        "other"
+      ],
+      "default": "text"
+    },
+    "raw_text": {
+      "type": "string",
+      "description": "\u05d4\u05d8\u05e7\u05e1\u05d8 \u05e9\u05d7\u05d5\u05dc\u05e5 \u05de\u05d4\u05de\u05e1\u05de\u05da"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL \u05e9\u05dc \u05d4\u05e7\u05d5\u05d1\u05e5 \u05e9\u05d4\u05d5\u05e2\u05dc\u05d4"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d4\u05de\u05e7\u05d5\u05e8\u05d9"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "indexed",
+        "error"
+      ],
+      "default": "pending",
+      "description": "\u05e1\u05d8\u05d8\u05d5\u05e1 \u05d4\u05e2\u05d9\u05d1\u05d5\u05d3 \u05dc-RAG"
+    },
+    "supabase_doc_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e1\u05de\u05da \u05d1-Supabase (\u05dc\u05d0\u05d7\u05e8 \u05d0\u05d9\u05e0\u05d3\u05d5\u05e7\u05e1)"
+    }
+  },
+  "required": [
+    "title",
+    "scope"
+  ]
+}

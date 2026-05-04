@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Briefcase, Users, Zap, Github } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, Zap, Github, BookOpen } from 'lucide-react';
 
 const navItems = [
   { label: 'דשבורד', icon: LayoutDashboard, path: '/' },
   { label: 'משרות', icon: Briefcase, path: '/jobs' },
   { label: 'מועמדים', icon: Users, path: '/candidates' },
   { label: 'GitHub Sourcing', icon: Github, path: '/sourcing' },
+  { label: 'ניהול תוכן', icon: BookOpen, path: '/content-management' },
 ];
 
 export default function Sidebar() {
