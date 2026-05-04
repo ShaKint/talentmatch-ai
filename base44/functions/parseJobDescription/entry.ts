@@ -91,10 +91,10 @@ Deno.serve(async (req) => {
   // Extract location constraints from must_have
   const locationKeywords = ['israel', 'tel aviv', 'jerusalem', 'haifa', 'remote', 'hybrid', 'on-site', 'onsite', 'usa', 'uk', 'europe', 'new york', 'london', 'berlin', 'amsterdam'];
   const locationRequirements = (parsed.must_have || []).filter(item =>
-    locationKeywords.some(loc => item.toLowerCase().includes(loc))
+    locationKeywords.some(loc => item.skill?.toLowerCase().includes(loc))
   );
   const locationStr = locationRequirements.length > 0
-    ? `LOCATION REQUIREMENT (MUST include in ALL queries): ${locationRequirements.join(', ')}`
+    ? `LOCATION REQUIREMENT (MUST include in ALL queries): ${locationRequirements.map(i => i.skill).join(', ')}`
     : 'Location: Israel (default — add "Israel" to all Google X-Ray queries)';
 
   // Step 2: Generate search queries
