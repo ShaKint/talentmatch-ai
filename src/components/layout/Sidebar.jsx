@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Briefcase, Users, Zap, Github, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, Zap, Github, BookOpen, Bot } from 'lucide-react';
 
 const navItems = [
   { label: 'דשבורד', icon: LayoutDashboard, path: '/' },
@@ -8,6 +8,7 @@ const navItems = [
   { label: 'מועמדים', icon: Users, path: '/candidates' },
   { label: 'GitHub Sourcing', icon: Github, path: '/sourcing' },
   { label: 'ניהול תוכן', icon: BookOpen, path: '/content-management' },
+  { label: 'סוכן AI', icon: Bot, path: '/agent-chat' },
 ];
 
 export default function Sidebar() {
