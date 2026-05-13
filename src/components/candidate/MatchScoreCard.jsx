@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Linkedin, Loader2, Trash2 } from 'lucide-react';
+import InviteToScreeningButton from './InviteToScreeningButton';
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -56,7 +57,7 @@ function Avatar({ name }) {
   );
 }
 
-export default function MatchScoreCard({ candidate, index = 0 }) {
+export default function MatchScoreCard({ candidate, index = 0, jobId }) {
   const match = candidate.match_result;
   const profile = candidate.parsed_profile;
   const isPending = candidate.status === 'pending' || !match;
@@ -130,6 +131,13 @@ export default function MatchScoreCard({ candidate, index = 0 }) {
       {match?.recommendation && (
         <div className="mt-4 bg-secondary/40 rounded-xl px-4 py-3">
           <p className="text-sm text-foreground leading-relaxed">{match.recommendation}</p>
+        </div>
+      )}
+
+      {/* Invite to screening */}
+      {jobId && !isPending && (
+        <div className="mt-3 flex justify-end">
+          <InviteToScreeningButton candidate={candidate} jobId={jobId} />
         </div>
       )}
 

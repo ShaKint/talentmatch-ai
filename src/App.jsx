@@ -17,6 +17,8 @@ import JobPreview from '@/pages/JobPreview';
 import ContentManagement from '@/pages/ContentManagement';
 import AgentChat from '@/pages/AgentChat';
 import CandidateRegister from '@/pages/CandidateRegister';
+import CandidateJobResponse from '@/pages/CandidateJobResponse';
+import Applications from '@/pages/Applications';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -42,6 +44,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/job-preview/:id" element={<JobPreview />} />
       <Route path="/candidate-register" element={<CandidateRegister />} />
+      <Route path="/candidate-response" element={<CandidateJobResponse />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -51,6 +54,7 @@ const AuthenticatedApp = () => {
         <Route path="/sourcing" element={<Sourcing />} />
         <Route path="/content-management" element={<ContentManagement />} />
         <Route path="/agent-chat" element={<AgentChat />} />
+        <Route path="/applications" element={<Applications />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -131,7 +131,7 @@ export default function JobDetails() {
                 <p className="text-sm text-muted-foreground text-center py-6">אין מועמדים עדיין. הוסף מועמדים מהעמודה הימנית.</p>
               ) : (
                 sortedCandidates.map((candidate, i) => (
-                  <MatchScoreCard key={candidate.id} candidate={candidate} index={i} />
+                  <MatchScoreCard key={candidate.id} candidate={candidate} index={i} jobId={id} />
                 ))
               )}
             </div>
