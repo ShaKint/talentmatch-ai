@@ -42,7 +42,7 @@ export default function ParsedRequirements({ parsedData }) {
           <div className="flex flex-wrap gap-1.5">
             {parsedData.must_have?.map((skill, i) => (
               <Badge key={i} className="bg-accent/10 text-accent border-accent/20 text-xs">
-                {skill}
+                {typeof skill === 'object' ? skill.skill : skill}
               </Badge>
             ))}
           </div>
@@ -55,7 +55,7 @@ export default function ParsedRequirements({ parsedData }) {
           <div className="flex flex-wrap gap-1.5">
             {parsedData.nice_to_have?.map((skill, i) => (
               <Badge key={i} variant="outline" className="text-xs">
-                {skill}
+                {typeof skill === 'object' ? skill.skill : skill}
               </Badge>
             ))}
           </div>

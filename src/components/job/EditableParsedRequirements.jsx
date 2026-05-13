@@ -146,14 +146,18 @@ export default function EditableParsedRequirements({ job, jobId }) {
 
   const updateList = (field, newList) => save({ [field]: newList });
 
+  // Normalize skill lists: extract .skill string if items are objects
+  const normalizeSkillList = (list = []) =>
+    list.map(item => (typeof item === 'object' && item !== null ? item.skill || '' : item));
+
   const addItem = (field, item) => {
-    const list = [...(parsed[field] || []), item];
-    updateList(field, list);
+    const existing = normalizeSkillList(parsed[field] || []);
+    updateList(field, [...existing, item]);
   };
 
   const removeItem = (field, idx) => {
-    const list = (parsed[field] || []).filter((_, i) => i !== idx);
-    updateList(field, list);
+    const existing = normalizeSkillList(parsed[field] || []);
+    updateList(field, existing.filter((_, i) => i !== idx));
   };
 
   const updateWeight = (key, val) => {
@@ -190,7 +194,7 @@ export default function EditableParsedRequirements({ job, jobId }) {
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Must Have</p>
               <TagList
-                items={parsed.must_have || []}
+                items={normalizeSkillList(parsed.must_have || [])}
                 color="bg-slate-900 text-white"
                 onAdd={item => addItem('must_have', item)}
                 onRemove={idx => removeItem('must_have', idx)}
@@ -200,7 +204,7 @@ export default function EditableParsedRequirements({ job, jobId }) {
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Nice to Have</p>
                 <TagList
-                  items={parsed.nice_to_have || []}
+                  items={normalizeSkillList(parsed.nice_to_have || [])}
                   color="border border-slate-200 text-slate-700 bg-white"
                   onAdd={item => addItem('nice_to_have', item)}
                   onRemove={idx => removeItem('nice_to_have', idx)}
