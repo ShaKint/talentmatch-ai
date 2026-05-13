@@ -84,7 +84,7 @@ export default function Jobs() {
                       <div className="flex flex-wrap gap-1.5 mb-4 justify-end">
                         {job.parsed_data.must_have.slice(0, 4).map((skill, i) => (
                           <span key={i} className="px-2.5 py-0.5 text-xs rounded-full border" style={{backgroundColor:'#F1F5F9', color:'#475569', borderColor:'#E2E8F0'}}>
-                            {skill}
+                            {typeof skill === 'object' ? skill.skill : skill}
                           </span>
                         ))}
                         {job.parsed_data.must_have.length > 4 && (
