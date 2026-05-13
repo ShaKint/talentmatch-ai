@@ -2,6 +2,10 @@
   "name": "Candidate",
   "type": "object",
   "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05de\u05e9\u05ea\u05de\u05e9 \u05d4\u05e8\u05e9\u05d5\u05dd (\u05d0\u05dd \u05e0\u05e8\u05e9\u05dd \u05dc\u05de\u05e2\u05e8\u05db\u05ea)"
+    },
     "job_id": {
       "type": "string",
       "description": "Associated job ID (optional - candidate can be in pool without specific job)"
@@ -10,6 +14,18 @@
       "type": "string",
       "description": "LinkedIn profile URL"
     },
+    "phone": {
+      "type": "string",
+      "description": "\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df"
+    },
+    "cv_file_url": {
+      "type": "string",
+      "description": "URL \u05dc\u05e7\u05d5\u05d1\u05e5 \u05e7\u05d5\u05e8\u05d5\u05ea \u05d7\u05d9\u05d9\u05dd \u05e9\u05d4\u05d5\u05e2\u05dc\u05d4"
+    },
+    "cv_file_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05e7\u05d5\u05d1\u05e5 \u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d7\u05d9\u05d9\u05dd"
+    },
     "raw_text": {
       "type": "string",
       "description": "Raw profile text or scraped data"
@@ -17,6 +33,55 @@
     "recruiter_notes": {
       "type": "string",
       "description": "Manual recruiter notes and observations"
+    },
+    "salary_min": {
+      "type": "number",
+      "description": "\u05e6\u05d9\u05e4\u05d9\u05d9\u05ea \u05e9\u05db\u05e8 \u05de\u05d9\u05e0\u05d9\u05de\u05dc\u05d9\u05ea (\u05d1\u05e8\u05d5\u05d8\u05d5 \u05d7\u05d5\u05d3\u05e9\u05d9)"
+    },
+    "salary_max": {
+      "type": "number",
+      "description": "\u05e6\u05d9\u05e4\u05d9\u05d9\u05ea \u05e9\u05db\u05e8 \u05de\u05e7\u05e1\u05d9\u05de\u05dc\u05d9\u05ea (\u05d1\u05e8\u05d5\u05d8\u05d5 \u05d7\u05d5\u05d3\u05e9\u05d9)"
+    },
+    "career_stage": {
+      "type": "string",
+      "enum": [
+        "entry",
+        "junior",
+        "mid",
+        "senior",
+        "lead",
+        "manager"
+      ],
+      "description": "\u05e9\u05dc\u05d1 \u05e7\u05e8\u05d9\u05d9\u05e8\u05d4"
+    },
+    "important_factors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u05d2\u05d5\u05e8\u05de\u05d9\u05dd \u05d7\u05e9\u05d5\u05d1\u05d9\u05dd \u05d1\u05d1\u05d7\u05d9\u05e8\u05ea \u05e2\u05d1\u05d5\u05d3\u05d4 (\u05e9\u05db\u05e8, \u05e4\u05d9\u05ea\u05d5\u05d7 \u05de\u05e7\u05e6\u05d5\u05e2\u05d9, \u05d2\u05de\u05d9\u05e9\u05d5\u05ea \u05d5\u05db\u05d5')"
+    },
+    "preferred_locations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u05de\u05d9\u05e7\u05d5\u05de\u05d9\u05dd \u05de\u05d5\u05e2\u05d3\u05e4\u05d9\u05dd"
+    },
+    "preferred_work_model": {
+      "type": "string",
+      "enum": [
+        "office",
+        "hybrid",
+        "remote",
+        "flexible"
+      ],
+      "description": "\u05de\u05d5\u05d3\u05dc \u05e2\u05d1\u05d5\u05d3\u05d4 \u05de\u05d5\u05e2\u05d3\u05e3"
+    },
+    "open_to_contact": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u05d4\u05d0\u05dd \u05de\u05e1\u05db\u05d9\u05dd \u05dc\u05e7\u05d1\u05dc \u05e4\u05e0\u05d9\u05d5\u05ea"
     },
     "parsed_profile": {
       "type": "object",
